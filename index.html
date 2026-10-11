@@ -167,4 +167,123 @@
       btnElement.classList.add('active');
       const chatBox = document.getElementById('chatBox');
       const levelName = level === 'pemula' ? 'Pemula' : level === 'menengah' ? 'Menengah' : 'Pro';
-      chatBox.innerHTML += `<div class="message ai" style="background:#E0E7
+      chatBox.innerHTML += `<div class="message ai" style="background:#E0E7FF; border:none; text-align:center; align-self:center; width:100%;">Tingkat kesulitan diubah ke: <b>${levelName}</b></div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // --- FITUR TEXT-TO-SPEECH (Membaca Teks AI) ---
+    function bacaTeks(teksTerEncode, bahasa) {
+      const teks = decodeURIComponent(teksTerEncode);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Hentikan suara sebelumnya jika ada
+        const ucapan = new SpeechSynthesisUtterance(teks);
+        // Pilih logat berdasarkan level (Pemula pakai suara Indo, Menengah/Pro pakai suara Inggris)
+        ucapan.lang = bahasa; 
+        window.speechSynthesis.speak(ucapan);
+      } else {
+        alert("Maaf, browser Anda tidak mendukung fitur membaca suara.");
+      }
+    }
+
+    // --- FITUR SPEECH-TO-TEXT (Mikrofon) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isRecording = false;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = function() {
+        isRecording = true;
+        document.getElementById('micBtn').classList.add('recording');
+        document.getElementById('userInput').placeholder = "Mendengarkan ucapan Anda...";
+      };
+
+      recognition.onresult = function(event) {
+        const hasilSuara = event.results[0][0].transcript;
+        document.getElementById('userInput').value = hasilSuara;
+        sendMessage(); // Otomatis kirim pesan setelah selesai bicara
+      };
+
+      recognition.onerror = function(event) { console.error("Error mic:", event.error); hentikanMic(); };
+      recognition.onend = function() { hentikanMic(); };
+    }
+
+    function toggleMic() {
+      if (!SpeechRecognition) { alert("Browser ini tidak mendukung mikrofon."); return; }
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        // Jika level pemula, AI memahami suara campuran Indo-Inggris. Jika Pro, full English.
+        recognition.lang = (currentLevel === 'pro') ? 'en-US' : 'id-ID';
+        recognition.start();
+      }
+    }
+
+    function hentikanMic() {
+      isRecording = false;
+      document.getElementById('micBtn').classList.remove('recording');
+      document.getElementById('userInput').placeholder = "Ketik pesan...";
+    }
+
+    // --- KIRIM PESAN KE AI ---
+    async function sendMessage() {
+      const inputField = document.getElementById('userInput');
+      const chatBox = document.getElementById('chatBox');
+      const text = inputField.value.trim();
+      
+      if (!text) return;
+      if (API_KEY === "GANTI_DENGAN_API_KEY_ANDA_YANG_DIAWALI_AQ") { alert("Silakan masukkan API Key di dalam kode!"); return; }
+
+      chatBox.innerHTML += `<div class="message user">${text}</div>`;
+      inputField.value = '';
+      
+      const loadingId = 'load-' + Date.now();
+      chatBox.innerHTML += `<div class="message ai loading-text" id="${loadingId}">AI sedang berpikir...</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const finalInstruction = levelInstructions[currentLevel] + `\n\nPENTING: Nama murid yang kamu ajar adalah "${studentName}". Ingat namanya. Jawablah sealami mungkin untuk percakapan.`;
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: finalInstruction }] },
+            contents: [{ parts: [{ text: text }] }]
+          })
+        });
+        
+        const data = await response.json();
+        if(data.error) throw new Error(data.error.message);
+
+        const reply = data.candidates[0].content.parts[0].text;
+        document.getElementById(loadingId).remove();
+        
+        // Membersihkan teks untuk dibaca mesin suara (menghilangkan tanda bintang atau hashtag)
+        let teksBersihUntukSuara = reply.replace(/\*/g, '').replace(/#/g, '').replace(/<[^>]*>?/gm, '');
+        // Tentukan logat baca mesin berdasarkan level
+        let logatSuara = (currentLevel === 'pemula') ? 'id-ID' : 'en-US';
+
+        const formattedReply = reply.replace(/\n/g, '<br>');
+        
+        chatBox.innerHTML += `
+          <div class="message ai">
+            ${formattedReply} <br>
+            <button class="btn-suara" onclick="bacaTeks('${encodeURIComponent(teksBersihUntukSuara)}', '${logatSuara}')">🔊 Dengarkan</button>
+          </div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
+      } catch (error) {
+        document.getElementById(loadingId).remove();
+        chatBox.innerHTML += `<div class="message ai" style="color:red;">Error: Gagal terhubung ke AI.</div>`;
+      }
+    }
+
+    document.getElementById("userInput").addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(); });
+    document.getElementById("studentNameInput").addEventListener("keypress", function(e) { if (e.key === "Enter") startApp(); });
+  </script>
+</body>
+</html>
