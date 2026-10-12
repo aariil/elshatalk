@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ELSHA - English AI Tutor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -14,12 +14,18 @@
             color: #fff;
             margin: 0;
             overflow-x: hidden;
+            /* Prevent bounce effect on mobile */
+            overscroll-behavior-y: none; 
         }
         .glass {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .sidebar-mobile {
+            background: rgba(102, 126, 234, 0.95);
+            backdrop-filter: blur(16px);
         }
         .chat-bubble-ai {
             background: rgba(255, 255, 255, 0.2);
@@ -30,9 +36,12 @@
             border-radius: 1rem 1rem 0.2rem 1rem;
         }
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+        
+        /* Ensure text breaks properly on small screens */
+        .break-words { word-break: break-word; }
     </style>
 </head>
 <body class="h-screen w-screen flex items-center justify-center p-0 md:p-4">
@@ -49,71 +58,85 @@
             <p class="text-white/80 mb-8 font-light">Your Modern English AI Tutor</p>
             
             <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4 transition">
-            <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key here (AIzaSy...)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-6 transition">
+            <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key (AQ... or AIza...)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-6 transition">
             
-            <button onclick="startApp()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition duration-300 transform hover:scale-105">
+            <button onclick="startApp()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 active:scale-95">
                 Start Learning <i class="fas fa-arrow-right ml-2"></i>
             </button>
             <p class="text-xs text-white/50 mt-4">*Your API Key is stored safely in your browser.</p>
         </div>
     </div>
 
-    <!-- MAIN APP APP -->
-    <div id="mainApp" class="hidden w-full h-full max-w-6xl md:h-[90vh] glass md:rounded-3xl shadow-2xl flex relative overflow-hidden">
+    <!-- MAIN APP -->
+    <div id="mainApp" class="hidden w-full h-full max-w-6xl md:h-[90vh] glass md:rounded-3xl shadow-2xl flex flex-col md:flex-row relative overflow-hidden">
         
-        <!-- Hamburger Button (Mobile) -->
-        <button id="menuToggleBtn" onclick="toggleMenu()" class="md:hidden absolute top-4 left-4 z-50 p-2 glass rounded-lg text-white shadow-lg transition">
-            <i class="fas fa-bars text-xl w-6 h-6 flex items-center justify-center"></i>
-        </button>
+        <!-- MOBILE HEADER (Only visible on smartphones) -->
+        <div class="md:hidden w-full glass px-4 py-3 flex items-center justify-between z-30 border-b border-white/20 shadow-sm">
+            <button onclick="toggleMenu()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition focus:outline-none">
+                <i class="fas fa-bars text-xl w-6 h-6 flex items-center justify-center"></i>
+            </button>
+            <h1 class="font-bold text-xl tracking-wider">ELSHA</h1>
+            <div class="w-10"></div> <!-- Spacer to keep title centered -->
+        </div>
 
         <!-- SIDEBAR -->
-        <div id="sidebar" class="w-64 h-full glass border-r border-white/20 p-6 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 absolute md:relative z-40">
-            <div class="flex items-center gap-4 mb-8 mt-12 md:mt-0">
-                <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold shadow-inner uppercase" id="userInitial">E</div>
-                <div>
-                    <h2 class="font-bold text-lg leading-tight">ELSHA</h2>
-                    <p class="text-xs text-white/70" id="userGreeting">Hi, User!</p>
+        <div id="sidebar" class="w-72 md:w-64 h-full sidebar-mobile md:bg-transparent border-r border-white/20 p-6 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 absolute md:relative z-50 top-0 left-0 shadow-2xl md:shadow-none">
+            
+            <!-- Close Button for Mobile -->
+            <button onclick="toggleMenu()" class="md:hidden absolute top-4 right-4 p-2 text-white/70 hover:text-white">
+                <i class="fas fa-times text-2xl w-6 h-6 flex items-center justify-center"></i>
+            </button>
+
+            <div class="flex items-center gap-4 mb-8 mt-2 md:mt-0">
+                <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold shadow-inner uppercase flex-shrink-0" id="userInitial">E</div>
+                <div class="overflow-hidden">
+                    <h2 class="font-bold text-lg leading-tight truncate">ELSHA</h2>
+                    <p class="text-xs text-white/70 truncate" id="userGreeting">Hi, User!</p>
                 </div>
             </div>
 
-            <nav class="flex-1 space-y-2">
+            <nav class="flex-1 space-y-2 overflow-y-auto pr-2 pb-4">
                 <button onclick="switchTab('chat')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 bg-white/20">
-                    <i class="fas fa-comments w-5"></i> Free Chat
+                    <i class="fas fa-comments w-5 text-center"></i> Free Chat
                 </button>
                 <button onclick="switchTab('roleplay')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3">
-                    <i class="fas fa-user-friends w-5"></i> Roleplay
+                    <i class="fas fa-user-friends w-5 text-center"></i> Roleplay
                 </button>
                 <button onclick="switchTab('game')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3">
-                    <i class="fas fa-gamepad w-5"></i> Vocab Game
+                    <i class="fas fa-gamepad w-5 text-center"></i> Vocab Game
                 </button>
                 <button onclick="switchTab('status')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-yellow-300">
-                    <i class="fas fa-wifi w-5"></i> System Status
+                    <i class="fas fa-stethoscope w-5 text-center"></i> System Status
                 </button>
             </nav>
 
             <button onclick="logout()" class="mt-auto w-full text-left px-4 py-3 rounded-xl hover:bg-red-500/50 transition flex items-center gap-3 text-red-300">
-                <i class="fas fa-sign-out-alt w-5"></i> Exit
+                <i class="fas fa-sign-out-alt w-5 text-center"></i> Exit
             </button>
         </div>
 
+        <!-- OVERLAY FOR MOBILE SIDEBAR -->
+        <div id="sidebarOverlay" onclick="toggleMenu()" class="hidden md:hidden absolute inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"></div>
+
         <!-- CONTENT AREA -->
-        <div class="flex-1 h-full flex flex-col relative">
+        <div class="flex-1 h-full flex flex-col relative overflow-hidden bg-black/5 md:bg-transparent">
             
             <!-- 1. FREE CHAT TAB -->
             <div id="tab-chat" class="tab-content h-full flex flex-col">
-                <div class="p-5 border-b border-white/10 flex justify-between items-center bg-black/10 pl-16 md:pl-5">
+                <div class="hidden md:flex p-5 border-b border-white/10 justify-between items-center bg-black/10">
                     <h3 class="font-semibold text-lg"><i class="fas fa-comments mr-2"></i> Free Chat</h3>
                 </div>
-                <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div id="chatBox" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
                     <!-- Chats will appear here -->
                 </div>
-                <div class="p-4 bg-black/10 backdrop-blur-md">
+                <!-- Chat Input Box -->
+                <div class="p-3 md:p-4 bg-black/20 backdrop-blur-md border-t border-white/10">
                     <div class="flex gap-2 relative">
-                        <button onclick="startVoiceRecognition('chat')" class="p-3 glass rounded-xl hover:bg-white/20 transition group">
+                        <button onclick="startVoiceRecognition('chat')" class="p-3 glass rounded-xl hover:bg-white/20 transition group flex-shrink-0 active:scale-95">
                             <i class="fas fa-microphone text-white group-hover:text-red-400"></i>
                         </button>
-                        <input type="text" id="chatInput" placeholder="Type or speak in English/Indonesian..." class="flex-1 bg-black/20 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                        <button onclick="sendMessage()" class="p-3 bg-indigo-500 hover:bg-indigo-600 rounded-xl transition shadow-lg">
+                        <input type="text" id="chatInput" placeholder="Type or speak here..." class="flex-1 bg-black/30 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button onclick="sendMessage()" class="p-3 bg-indigo-500 hover:bg-indigo-600 rounded-xl transition shadow-lg flex-shrink-0 active:scale-95">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
@@ -121,87 +144,92 @@
             </div>
 
             <!-- 2. ROLEPLAY TAB -->
-            <div id="tab-roleplay" class="tab-content hidden h-full flex flex-col overflow-y-auto p-6 pl-16 md:pl-6">
-                <h2 class="text-3xl font-bold mb-2"><i class="fas fa-theater-masks mr-2"></i> Roleplay</h2>
-                <p class="text-white/80 mb-6">Choose a scenario to practice real-life English.</p>
+            <div id="tab-roleplay" class="tab-content hidden h-full flex flex-col overflow-y-auto p-4 md:p-6">
+                <div class="mb-6 mt-2 md:mt-0">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2"><i class="fas fa-theater-masks mr-2"></i> Roleplay</h2>
+                    <p class="text-white/80 text-sm md:text-base">Choose a scenario to practice real-life English.</p>
+                </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div onclick="startRoleplay('You are a friendly local in a mountain village. I am a cyclist riding my bike enjoying the trees and river. I stop to ask you for directions and chat.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-green-400">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6">
+                    <div onclick="startRoleplay('You are a friendly local in a mountain village. I am a cyclist riding my bike enjoying the trees and river. I stop to ask you for directions and chat.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-green-400 active:scale-95">
                         <i class="fas fa-mountain text-3xl text-green-400 mb-3"></i>
                         <h3 class="font-bold text-lg">Mountain Cyclist</h3>
-                        <p class="text-sm text-white/70">Ask locals for directions while enjoying the trees and rivers on your bike ride.</p>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Ask locals for directions while enjoying the nature.</p>
                     </div>
-                    <div onclick="startRoleplay('You are a waiter at a restaurant. I am a customer ordering a bowl of bakso with yellow noodles, and maybe some homemade style ramen with a half-cut soft boiled egg.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-orange-400">
+                    <div onclick="startRoleplay('You are a waiter at a restaurant. I am a customer ordering a bowl of bakso with yellow noodles, and maybe some homemade style ramen with a half-cut soft boiled egg.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-orange-400 active:scale-95">
                         <i class="fas fa-utensils text-3xl text-orange-400 mb-3"></i>
                         <h3 class="font-bold text-lg">Ordering Food</h3>
-                        <p class="text-sm text-white/70">Practice ordering specific meals like ramen or bakso with yellow noodles.</p>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Practice ordering specific meals like ramen or bakso.</p>
                     </div>
-                    <div onclick="startRoleplay('You are a client who needs a logo for your courier and logistics business. I am a graphic designer discussing the visual concepts with you.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-blue-400">
+                    <div onclick="startRoleplay('You are a client who needs a logo for your courier and logistics business. I am a graphic designer discussing the visual concepts with you.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-blue-400 active:scale-95">
                         <i class="fas fa-pencil-ruler text-3xl text-blue-400 mb-3"></i>
                         <h3 class="font-bold text-lg">Design Client</h3>
-                        <p class="text-sm text-white/70">Discuss visual concepts and graphic design projects with a client.</p>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Discuss visual concepts for graphic design projects.</p>
                     </div>
-                    <div onclick="startRoleplay('You are an expert mechanic. I am asking you for technical advice on why a motorcycle piston ring wears out and why a bicycle chain slips off the rear derailleur pulley.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-gray-400">
+                    <div onclick="startRoleplay('You are an expert mechanic. I am asking you for technical advice on why a motorcycle piston ring wears out and why a bicycle chain slips off the rear derailleur pulley.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-gray-400 active:scale-95">
                         <i class="fas fa-cogs text-3xl text-gray-400 mb-3"></i>
                         <h3 class="font-bold text-lg">Mechanic Shop</h3>
-                        <p class="text-sm text-white/70">Discuss technical vehicle repairs and mechanical parts.</p>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Discuss technical vehicle repairs and parts.</p>
                     </div>
                 </div>
             </div>
 
             <!-- 3. VOCAB GAME TAB -->
-            <div id="tab-game" class="tab-content hidden h-full flex flex-col items-center justify-center p-6 text-center pl-16 md:pl-6">
-                <div class="glass p-8 rounded-3xl max-w-md w-full relative overflow-hidden">
+            <div id="tab-game" class="tab-content hidden h-full flex flex-col items-center justify-center p-4 md:p-6 text-center">
+                <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-1 bg-white/20"><div id="lvlProgress" class="h-full bg-yellow-400 w-0 transition-all"></div></div>
                     
                     <div class="flex justify-between items-center mb-6">
-                        <div class="text-sm font-bold bg-white/20 px-3 py-1 rounded-full" id="levelDisplay">Level 1</div>
-                        <div class="text-sm font-bold bg-yellow-400/80 text-black px-3 py-1 rounded-full shadow-lg"><i class="fas fa-star text-xs"></i> Score: <span id="scoreDisplay">0</span></div>
+                        <div class="text-xs md:text-sm font-bold bg-white/20 px-3 py-1 rounded-full" id="levelDisplay">Level 1</div>
+                        <div class="text-xs md:text-sm font-bold bg-yellow-400/80 text-black px-3 py-1 rounded-full shadow-lg"><i class="fas fa-star text-xs"></i> Score: <span id="scoreDisplay">0</span></div>
                     </div>
                     
-                    <h2 class="text-xl mb-2 text-white/80">Translate this word:</h2>
-                    <h1 id="wordToGuess" class="text-4xl font-bold text-white mb-8 tracking-wider">...</h1>
+                    <h2 class="text-sm md:text-base mb-2 text-white/80">Translate this word:</h2>
+                    <h1 id="wordToGuess" class="text-3xl md:text-4xl font-bold text-white mb-6 md:mb-8 tracking-wider break-words px-2">...</h1>
                     
-                    <input type="text" id="gameInput" placeholder="Type meaning in Indonesian..." class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-center text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4" onkeypress="if(event.key === 'Enter') checkWord()">
+                    <input type="text" id="gameInput" placeholder="Indonesian meaning..." class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-center text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4 text-sm md:text-base" onkeypress="if(event.key === 'Enter') checkWord()">
                     
-                    <button onclick="checkWord()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition shadow-lg">
+                    <button onclick="checkWord()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition shadow-lg active:scale-95 text-sm md:text-base">
                         Submit Answer
                     </button>
-                    <p id="gameFeedback" class="mt-4 text-sm font-semibold h-5"></p>
+                    <p id="gameFeedback" class="mt-4 text-xs md:text-sm font-semibold h-5"></p>
                 </div>
             </div>
 
             <!-- 4. SYSTEM STATUS TAB -->
-            <div id="tab-status" class="tab-content hidden h-full flex flex-col p-6 pl-16 md:pl-6 overflow-y-auto">
-                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-stethoscope mr-2"></i> System Diagnostics</h2>
+            <div id="tab-status" class="tab-content hidden h-full flex flex-col p-4 md:p-6 overflow-y-auto">
+                <div class="mb-6 mt-2 md:mt-0">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2"><i class="fas fa-stethoscope mr-2"></i> Diagnostics</h2>
+                    <p class="text-white/80 text-sm md:text-base">Check your connection and API Key status.</p>
+                </div>
                 
-                <div class="space-y-4 max-w-2xl">
-                    <div class="glass p-5 rounded-2xl flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg"><i class="fas fa-wifi mr-2"></i> Internet Connection</h3>
-                            <p class="text-sm text-white/70">Checking network status...</p>
+                <div class="space-y-3 md:space-y-4 max-w-2xl w-full">
+                    <div class="glass p-4 md:p-5 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-base md:text-lg"><i class="fas fa-wifi mr-2"></i> Network</h3>
+                            <p class="text-xs md:text-sm text-white/70 mt-1">Checking internet connection...</p>
                         </div>
-                        <div id="statusNetwork" class="text-2xl"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                        <div id="statusNetwork" class="text-xl md:text-2xl flex-shrink-0"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
 
-                    <div class="glass p-5 rounded-2xl flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg"><i class="fas fa-key mr-2"></i> API Key Setup</h3>
-                            <p class="text-sm text-white/70">Checking if API key is stored locally...</p>
+                    <div class="glass p-4 md:p-5 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-base md:text-lg"><i class="fas fa-key mr-2"></i> API Key</h3>
+                            <p class="text-xs md:text-sm text-white/70 mt-1">Validating key format (AQ... or AIza...)</p>
                         </div>
-                        <div id="statusKey" class="text-2xl"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                        <div id="statusKey" class="text-xl md:text-2xl flex-shrink-0"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
 
-                    <div class="glass p-5 rounded-2xl flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg"><i class="fas fa-server mr-2"></i> Gemini Server Ping</h3>
-                            <p class="text-sm text-white/70">Testing connection to Google AI Studio...</p>
+                    <div class="glass p-4 md:p-5 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-base md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
+                            <p class="text-xs md:text-sm text-white/70 mt-1">Testing connection to Gemini AI...</p>
                         </div>
-                        <div id="statusPing" class="text-2xl"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                        <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
                 </div>
 
-                <button onclick="runDiagnostics()" class="mt-8 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition w-max">
+                <button onclick="runDiagnostics()" class="mt-6 md:mt-8 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition w-full md:w-max active:scale-95 text-sm md:text-base">
                     <i class="fas fa-sync-alt mr-2"></i> Refresh Status
                 </button>
             </div>
@@ -222,7 +250,6 @@
         let currentWordIndex = -1;
         let usedIndices = [];
         
-        // Level 1: Basic words (Everyday items, cycling, food)
         const vocabLevel1 = [
             { en: "Bicycle", id: "sepeda" }, { en: "Mountain", id: "gunung" }, { en: "Tree", id: "pohon" },
             { en: "River", id: "sungai" }, { en: "Noodle", id: "mie" }, { en: "Egg", id: "telur" },
@@ -230,7 +257,6 @@
             { en: "Speak", id: "berbicara" }, { en: "Listen", id: "mendengar" }, { en: "Water", id: "air" }
         ];
 
-        // Level 2: Harder words (Mechanics, Design, Law, Stocks)
         const vocabLevel2 = [
             { en: "Piston", id: "piston" }, { en: "Pulley", id: "katrol" }, { en: "Derailleur", id: "pemindah gigi" },
             { en: "Graphic", id: "grafis" }, { en: "Logistics", id: "logistik" }, { en: "Capital", id: "modal" },
@@ -249,10 +275,9 @@
                 showMainApp();
             }
             
-            // Load Voices
+            // Load Voices for natural female voice
             synth.onvoiceschanged = () => {
                 const voices = synth.getVoices();
-                // Prefer high quality female voices
                 femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Zira') || v.name.includes('Samantha') || (v.name.includes('Female') && v.lang.startsWith('en'))) || voices.find(v => v.lang.startsWith('en'));
             };
         };
@@ -266,8 +291,9 @@
                 return;
             }
 
-            if (!key.startsWith("AIzaSy")) {
-                alert("Warning: Valid Gemini API keys usually start with 'AIzaSy'. Please check your key.");
+            // Updated Validation to accept both AQ. and AIzaSy
+            if (!key.startsWith("AIzaSy") && !key.startsWith("AQ.")) {
+                alert("Warning: Valid Gemini API keys usually start with 'AIzaSy' or 'AQ.'. Please make sure your key is correct.");
             }
 
             userName = name;
@@ -297,13 +323,15 @@
         // --- MOBILE MENU ---
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
-            const icon = document.querySelector('#menuToggleBtn i');
+            const overlay = document.getElementById('sidebarOverlay');
+            
             sidebar.classList.toggle('-translate-x-full');
             
+            // Toggle Overlay visibility
             if (sidebar.classList.contains('-translate-x-full')) {
-                icon.className = 'fas fa-bars text-xl w-6 h-6 flex items-center justify-center';
+                overlay.classList.add('hidden');
             } else {
-                icon.className = 'fas fa-times text-xl w-6 h-6 flex items-center justify-center';
+                overlay.classList.remove('hidden');
             }
         }
 
@@ -313,9 +341,14 @@
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             
             document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-white/20'));
-            event.currentTarget.classList.add('bg-white/20');
+            // If triggered by click event
+            if(event && event.currentTarget) {
+                event.currentTarget.classList.add('bg-white/20');
+            }
 
-            if(window.innerWidth < 768) toggleMenu(); // Auto close menu on mobile
+            if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+                toggleMenu(); // Close mobile menu when tab is clicked
+            }
             
             if(tabId === 'game' && currentWordIndex === -1) nextWord();
             if(tabId === 'status') runDiagnostics();
@@ -338,7 +371,7 @@
                 
                 if (!response.ok) {
                     const err = await response.json();
-                    throw new Error(err.error.message);
+                    throw new Error(err.error.message || "Unknown API Error");
                 }
                 
                 const data = await response.json();
@@ -372,21 +405,21 @@
             
             div.className = `flex ${isAI ? 'justify-start' : 'justify-end'} mb-4`;
             
-            // Text formatting to remove markdown bolding for cleaner reading
             const cleanText = text.replace(/\*\*/g, '');
             const msgId = 'msg-' + Date.now();
 
-            let innerHTML = `<div class="max-w-[85%] md:max-w-[75%] p-4 ${isAI ? 'chat-bubble-ai text-white' : 'chat-bubble-user text-white'} shadow-md">
-                <p class="leading-relaxed" id="${msgId}">${cleanText}</p>`;
+            // Use break-words and proper padding for mobile
+            let innerHTML = `<div class="max-w-[90%] md:max-w-[75%] p-3 md:p-4 ${isAI ? 'chat-bubble-ai text-white' : 'chat-bubble-user text-white'} shadow-md">
+                <p class="leading-relaxed text-sm md:text-base break-words" id="${msgId}">${cleanText}</p>`;
 
-            // Add "See Translation" button for AI messages
+            // "See Translation" Button
             if (isAI) {
                 innerHTML += `
                 <div class="mt-2 pt-2 border-t border-white/20 flex flex-col gap-2">
-                    <button onclick="translateInline('${msgId}')" class="text-xs font-semibold text-white/70 hover:text-white text-left flex items-center transition">
+                    <button onclick="translateInline('${msgId}')" class="text-xs md:text-sm font-semibold text-white/70 hover:text-white text-left flex items-center transition active:scale-95 w-max">
                         <i class="fas fa-language mr-1"></i> <span id="btn-${msgId}">See Translation</span>
                     </button>
-                    <p id="trans-${msgId}" class="text-sm text-yellow-200 hidden italic"></p>
+                    <p id="trans-${msgId}" class="text-xs md:text-sm text-yellow-200 hidden italic break-words"></p>
                 </div>`;
             }
             
@@ -396,27 +429,23 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Inline Translation (Instagram style)
         async function translateInline(msgId) {
             const transBox = document.getElementById(`trans-${msgId}`);
             const btnSpan = document.getElementById(`btn-${msgId}`);
             const originalText = document.getElementById(msgId).innerText;
 
             if (!transBox.classList.contains('hidden')) {
-                // Hide if already shown
                 transBox.classList.add('hidden');
                 btnSpan.innerText = "See Translation";
                 return;
             }
 
             if (transBox.innerText !== "") {
-                // Show cached translation
                 transBox.classList.remove('hidden');
                 btnSpan.innerText = "Hide Translation";
                 return;
             }
 
-            // Fetch translation
             btnSpan.innerText = "Translating...";
             const prompt = `Translate the following English text to natural Indonesian language. Do not add any extra comments, just output the translation:\n\n"${originalText}"`;
             
@@ -437,8 +466,8 @@
             const id = 'typing-' + Date.now();
             div.id = id;
             div.className = `flex justify-start mb-4`;
-            div.innerHTML = `<div class="p-4 chat-bubble-ai text-white/70 shadow-md">
-                <i class="fas fa-circle-notch fa-spin"></i> ELSHA is typing...
+            div.innerHTML = `<div class="p-3 md:p-4 chat-bubble-ai text-white/70 shadow-md text-sm md:text-base">
+                <i class="fas fa-circle-notch fa-spin mr-2"></i> ELSHA is typing...
             </div>`;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -453,10 +482,9 @@
         // --- ROLEPLAY LOGIC ---
         function startRoleplay(scenarioPrompt) {
             switchTab('chat');
-            document.getElementById('chatBox').innerHTML = ''; // Clear chat
+            document.getElementById('chatBox').innerHTML = ''; 
             addMessage("Roleplay started! Let's begin.", 'ai');
             
-            // Set context by silently starting the conversation based on the prompt
             setTimeout(async () => {
                 const typingId = addTypingIndicator();
                 const response = await callGeminiAPI("Hello, please start the roleplay based on your persona.", scenarioPrompt);
@@ -470,7 +498,6 @@
         function nextWord() {
             const currentVocabList = currentLevel === 1 ? vocabLevel1 : vocabLevel2;
             
-            // Reset used words if all have been played
             if (usedIndices.length >= currentVocabList.length) {
                 usedIndices = [];
             }
@@ -496,27 +523,25 @@
 
             if (input === correctWord) {
                 feedback.innerText = "Correct! +10 Points 🌟";
-                feedback.className = "mt-4 text-sm font-semibold h-5 text-green-300";
+                feedback.className = "mt-4 text-xs md:text-sm font-semibold h-5 text-green-300";
                 currentScore += 10;
                 document.getElementById('scoreDisplay').innerText = currentScore;
                 
-                // Level Up Logic
                 if (currentScore >= 100 && currentLevel === 1) {
                     currentLevel = 2;
-                    usedIndices = []; // Reset for new level
+                    usedIndices = []; 
                     document.getElementById('levelDisplay').innerText = "Level 2";
                     document.getElementById('levelDisplay').classList.replace("bg-white/20", "bg-red-500/80");
                     alert("🎉 Congratulations! You reached 100 points and advanced to Level 2! Words will be harder now.");
                 }
 
-                // Update Progress Bar (Max 100 per level visually)
                 const progress = Math.min((currentScore % 100) || (currentScore === 100 ? 100 : 0), 100);
                 document.getElementById('lvlProgress').style.width = `${progress}%`;
 
                 setTimeout(nextWord, 1000);
             } else {
                 feedback.innerText = `Wrong! The correct answer is "${currentVocabList[currentWordIndex].id}" ❌`;
-                feedback.className = "mt-4 text-sm font-semibold h-5 text-red-300";
+                feedback.className = "mt-4 text-xs md:text-sm font-semibold h-5 text-red-300";
             }
         }
 
@@ -526,7 +551,6 @@
             const keyIcon = document.getElementById('statusKey');
             const pingIcon = document.getElementById('statusPing');
 
-            // Reset UI
             netIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
             keyIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
             pingIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
@@ -538,13 +562,13 @@
                 } else {
                     netIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
                     pingIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-400"></i>';
-                    return; // Stop here if offline
+                    return; 
                 }
             }, 500);
 
-            // 2. Check API Key Locally
+            // 2. Check API Key Locally (Accepts AQ. and AIzaSy)
             setTimeout(() => {
-                if (apiKey && apiKey.startsWith("AIzaSy")) {
+                if (apiKey && (apiKey.startsWith("AIzaSy") || apiKey.startsWith("AQ."))) {
                     keyIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
                 } else {
                     keyIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
@@ -556,7 +580,6 @@
                 if (!navigator.onLine || !apiKey) return;
                 
                 try {
-                    // Send a tiny request just to verify auth
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                     const response = await fetch(url, {
                         method: "POST",
@@ -569,7 +592,8 @@
                     } else {
                         const err = await response.json();
                         console.error("API Error:", err);
-                        pingIcon.innerHTML = `<i class="fas fa-times-circle text-red-400"></i> <span class="text-xs text-red-300 block mt-1">${err.error.status || 'Failed'}</span>`;
+                        // Using text-xs for error message to prevent breaking layout
+                        pingIcon.innerHTML = `<div class="flex flex-col items-end"><i class="fas fa-times-circle text-red-400 mb-1"></i> <span class="text-[10px] md:text-xs text-red-300 leading-tight">${err.error.status || 'Failed'}</span></div>`;
                     }
                 } catch (e) {
                     pingIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
