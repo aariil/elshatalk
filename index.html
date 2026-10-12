@@ -54,4 +54,596 @@
                     <i class="fas fa-language text-4xl text-white"></i>
                 </div>
             </div>
-            <h1 class="text-4xl font-bold mb-2 tracking-wide
+            <h1 class="text-4xl font-bold mb-2 tracking-wide">ELSHA</h1>
+            <p class="text-white/80 mb-8 font-light">Your Modern English AI Tutor</p>
+            
+            <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4 transition">
+            <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key (AQ... or AIza...)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-6 transition">
+            
+            <button onclick="startApp()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 active:scale-95">
+                Start Learning <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+            <p class="text-xs text-white/50 mt-4">*Your API Key is stored safely in your browser.</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainApp" class="hidden w-full h-full max-w-6xl md:h-[90vh] glass md:rounded-3xl shadow-2xl flex flex-col md:flex-row relative overflow-hidden">
+        
+        <!-- MOBILE HEADER (Only visible on smartphones) -->
+        <div class="md:hidden w-full glass px-4 py-3 flex items-center justify-between z-30 border-b border-white/20 shadow-sm">
+            <button onclick="toggleMenu()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition focus:outline-none">
+                <i class="fas fa-bars text-xl w-6 h-6 flex items-center justify-center"></i>
+            </button>
+            <h1 class="font-bold text-xl tracking-wider">ELSHA</h1>
+            <div class="w-10"></div> <!-- Spacer to keep title centered -->
+        </div>
+
+        <!-- SIDEBAR -->
+        <div id="sidebar" class="w-72 md:w-64 h-full sidebar-mobile md:bg-transparent border-r border-white/20 p-6 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 absolute md:relative z-50 top-0 left-0 shadow-2xl md:shadow-none">
+            
+            <!-- Close Button for Mobile -->
+            <button onclick="toggleMenu()" class="md:hidden absolute top-4 right-4 p-2 text-white/70 hover:text-white">
+                <i class="fas fa-times text-2xl w-6 h-6 flex items-center justify-center"></i>
+            </button>
+
+            <div class="flex items-center gap-4 mb-8 mt-2 md:mt-0">
+                <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold shadow-inner uppercase flex-shrink-0" id="userInitial">E</div>
+                <div class="overflow-hidden">
+                    <h2 class="font-bold text-lg leading-tight truncate">ELSHA</h2>
+                    <p class="text-xs text-white/70 truncate" id="userGreeting">Hi, User!</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 space-y-2 overflow-y-auto pr-2 pb-4">
+                <button onclick="switchTab('chat')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 bg-white/20">
+                    <i class="fas fa-comments w-5 text-center"></i> Free Chat
+                </button>
+                <button onclick="switchTab('roleplay')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3">
+                    <i class="fas fa-user-friends w-5 text-center"></i> Roleplay
+                </button>
+                <button onclick="switchTab('game')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3">
+                    <i class="fas fa-gamepad w-5 text-center"></i> Vocab Game
+                </button>
+                <button onclick="switchTab('status')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-yellow-300">
+                    <i class="fas fa-stethoscope w-5 text-center"></i> System Status
+                </button>
+            </nav>
+
+            <button onclick="logout()" class="mt-auto w-full text-left px-4 py-3 rounded-xl hover:bg-red-500/50 transition flex items-center gap-3 text-red-300">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i> Exit
+            </button>
+        </div>
+
+        <!-- OVERLAY FOR MOBILE SIDEBAR -->
+        <div id="sidebarOverlay" onclick="toggleMenu()" class="hidden md:hidden absolute inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"></div>
+
+        <!-- CONTENT AREA -->
+        <div class="flex-1 h-full flex flex-col relative overflow-hidden bg-black/5 md:bg-transparent">
+            
+            <!-- 1. FREE CHAT TAB -->
+            <div id="tab-chat" class="tab-content h-full flex flex-col">
+                <div class="hidden md:flex p-5 border-b border-white/10 justify-between items-center bg-black/10">
+                    <h3 class="font-semibold text-lg"><i class="fas fa-comments mr-2"></i> Free Chat</h3>
+                </div>
+                <div id="chatBox" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+                    <!-- Chats will appear here -->
+                </div>
+                <!-- Chat Input Box -->
+                <div class="p-3 md:p-4 bg-black/20 backdrop-blur-md border-t border-white/10">
+                    <div class="flex gap-2 relative">
+                        <button onclick="startVoiceRecognition('chat')" class="p-3 glass rounded-xl hover:bg-white/20 transition group flex-shrink-0 active:scale-95">
+                            <i class="fas fa-microphone text-white group-hover:text-red-400"></i>
+                        </button>
+                        <input type="text" id="chatInput" placeholder="Type or speak here..." class="flex-1 bg-black/30 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button onclick="sendMessage()" class="p-3 bg-indigo-500 hover:bg-indigo-600 rounded-xl transition shadow-lg flex-shrink-0 active:scale-95">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ROLEPLAY TAB -->
+            <div id="tab-roleplay" class="tab-content hidden h-full flex flex-col overflow-y-auto p-4 md:p-6">
+                <div class="mb-6 mt-2 md:mt-0">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2"><i class="fas fa-theater-masks mr-2"></i> Roleplay</h2>
+                    <p class="text-white/80 text-sm md:text-base">Choose a scenario to practice real-life English.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6">
+                    <div onclick="startRoleplay('You are a friendly local in a mountain village. I am a cyclist riding my bike enjoying the trees and river. I stop to ask you for directions and chat.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-green-400 active:scale-95">
+                        <i class="fas fa-mountain text-3xl text-green-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Mountain Cyclist</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Ask locals for directions while enjoying the nature.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are a waiter at a restaurant. I am a customer ordering a bowl of bakso with yellow noodles, and maybe some homemade style ramen with a half-cut soft boiled egg.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-orange-400 active:scale-95">
+                        <i class="fas fa-utensils text-3xl text-orange-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Ordering Food</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Practice ordering specific meals like ramen or bakso.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are a client who needs a logo for your courier and logistics business. I am a graphic designer discussing the visual concepts with you.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-blue-400 active:scale-95">
+                        <i class="fas fa-pencil-ruler text-3xl text-blue-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Design Client</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Discuss visual concepts for graphic design projects.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are an expert mechanic. I am asking you for technical advice on why a motorcycle piston ring wears out and why a bicycle chain slips off the rear derailleur pulley.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-gray-400 active:scale-95">
+                        <i class="fas fa-cogs text-3xl text-gray-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Mechanic Shop</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Discuss technical vehicle repairs and parts.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. VOCAB GAME TAB -->
+            <div id="tab-game" class="tab-content hidden h-full flex flex-col items-center justify-center p-4 md:p-6 text-center">
+                <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-white/20"><div id="lvlProgress" class="h-full bg-yellow-400 w-0 transition-all"></div></div>
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="text-xs md:text-sm font-bold bg-white/20 px-3 py-1 rounded-full" id="levelDisplay">Level 1</div>
+                        <div class="text-xs md:text-sm font-bold bg-yellow-400/80 text-black px-3 py-1 rounded-full shadow-lg"><i class="fas fa-star text-xs"></i> Score: <span id="scoreDisplay">0</span></div>
+                    </div>
+                    
+                    <h2 class="text-sm md:text-base mb-2 text-white/80">Translate this word:</h2>
+                    <h1 id="wordToGuess" class="text-3xl md:text-4xl font-bold text-white mb-6 md:mb-8 tracking-wider break-words px-2">...</h1>
+                    
+                    <input type="text" id="gameInput" placeholder="Indonesian meaning..." class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-center text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4 text-sm md:text-base" onkeypress="if(event.key === 'Enter') checkWord()">
+                    
+                    <button onclick="checkWord()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition shadow-lg active:scale-95 text-sm md:text-base">
+                        Submit Answer
+                    </button>
+                    <p id="gameFeedback" class="mt-4 text-xs md:text-sm font-semibold h-5"></p>
+                </div>
+            </div>
+
+            <!-- 4. SYSTEM STATUS TAB -->
+            <div id="tab-status" class="tab-content hidden h-full flex flex-col p-4 md:p-6 overflow-y-auto">
+                <div class="mb-6 mt-2 md:mt-0">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2"><i class="fas fa-stethoscope mr-2"></i> Diagnostics</h2>
+                    <p class="text-white/80 text-sm md:text-base">Check your connection and API Key status.</p>
+                </div>
+                
+                <div class="space-y-3 md:space-y-4 max-w-2xl w-full">
+                    <div class="glass p-4 md:p-5 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-base md:text-lg"><i class="fas fa-wifi mr-2"></i> Network</h3>
+                            <p class="text-xs md:text-sm text-white/70 mt-1">Checking internet connection...</p>
+                        </div>
+                        <div id="statusNetwork" class="text-xl md:text-2xl flex-shrink-0"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
+
+                    <div class="glass p-4 md:p-5 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-base md:text-lg"><i class="fas fa-key mr-2"></i> API Key</h3>
+                            <p class="text-xs md:text-sm text-white/70 mt-1">Validating key format (AQ... or AIza...)</p>
+                        </div>
+                        <div id="statusKey" class="text-xl md:text-2xl flex-shrink-0"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
+
+                    <div class="glass p-4 md:p-5 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-base md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
+                            <p class="text-xs md:text-sm text-white/70 mt-1">Testing connection to Gemini AI...</p>
+                        </div>
+                        <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
+                </div>
+
+                <button onclick="runDiagnostics()" class="mt-6 md:mt-8 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition w-full md:w-max active:scale-95 text-sm md:text-base">
+                    <i class="fas fa-sync-alt mr-2"></i> Refresh Status
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL VARIABLES ---
+        let userName = "";
+        let apiKey = "";
+        let chatHistory = [];
+        let synth = window.speechSynthesis;
+        let femaleVoice = null;
+        
+        // Vocab Game Variables
+        let currentScore = 0;
+        let currentLevel = 1;
+        let currentWordIndex = -1;
+        let usedIndices = [];
+        
+        const vocabLevel1 = [
+            { en: "Bicycle", id: "sepeda" }, { en: "Mountain", id: "gunung" }, { en: "Tree", id: "pohon" },
+            { en: "River", id: "sungai" }, { en: "Noodle", id: "mie" }, { en: "Egg", id: "telur" },
+            { en: "Bowl", id: "mangkuk" }, { en: "Draw", id: "menggambar" }, { en: "Paper", id: "kertas" },
+            { en: "Speak", id: "berbicara" }, { en: "Listen", id: "mendengar" }, { en: "Water", id: "air" }
+        ];
+
+        const vocabLevel2 = [
+            { en: "Piston", id: "piston" }, { en: "Pulley", id: "katrol" }, { en: "Derailleur", id: "pemindah gigi" },
+            { en: "Graphic", id: "grafis" }, { en: "Logistics", id: "logistik" }, { en: "Capital", id: "modal" },
+            { en: "Dividend", id: "dividen" }, { en: "Indemnity", id: "ganti rugi" }, { en: "Breach", id: "pelanggaran" },
+            { en: "Contract", id: "kontrak" }, { en: "Symptom", id: "gejala" }, { en: "Wear out", id: "aus" }
+        ];
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            const storedName = localStorage.getItem('elsha_username');
+            const storedKey = localStorage.getItem('elsha_apiKey');
+            
+            if (storedName && storedKey) {
+                userName = storedName;
+                apiKey = storedKey;
+                showMainApp();
+            }
+            
+            // Load Voices for natural female voice
+            synth.onvoiceschanged = () => {
+                const voices = synth.getVoices();
+                femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Zira') || v.name.includes('Samantha') || (v.name.includes('Female') && v.lang.startsWith('en'))) || voices.find(v => v.lang.startsWith('en'));
+            };
+        };
+
+        function startApp() {
+            const name = document.getElementById('userNameInput').value.trim();
+            const key = document.getElementById('apiKeyInput').value.trim();
+            
+            if (!name || !key) {
+                alert("Please enter both your name and API Key!");
+                return;
+            }
+
+            // Updated Validation to accept both AQ. and AIzaSy
+            if (!key.startsWith("AIzaSy") && !key.startsWith("AQ.")) {
+                alert("Warning: Valid Gemini API keys usually start with 'AIzaSy' or 'AQ.'. Please make sure your key is correct.");
+            }
+
+            userName = name;
+            apiKey = key;
+            localStorage.setItem('elsha_username', userName);
+            localStorage.setItem('elsha_apiKey', apiKey);
+            
+            showMainApp();
+        }
+
+        function showMainApp() {
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userGreeting').innerText = `Hi, ${userName}!`;
+            document.getElementById('userInitial').innerText = userName.charAt(0).toUpperCase();
+            
+            if(chatHistory.length === 0) {
+                addMessage(`Hello ${userName}! I am ELSHA, your English AI tutor. Let's practice!`, 'ai');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('elsha_apiKey');
+            location.reload();
+        }
+
+        // --- MOBILE MENU ---
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            
+            // Toggle Overlay visibility
+            if (sidebar.classList.contains('-translate-x-full')) {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        // --- TAB NAVIGATION ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-white/20'));
+            // If triggered by click event
+            if(event && event.currentTarget) {
+                event.currentTarget.classList.add('bg-white/20');
+            }
+
+            if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+                toggleMenu(); // Close mobile menu when tab is clicked
+            }
+            
+            if(tabId === 'game' && currentWordIndex === -1) nextWord();
+            if(tabId === 'status') runDiagnostics();
+        }
+
+        // --- CHAT LOGIC & API ---
+        async function callGeminiAPI(prompt, systemInstruction = "") {
+            // UPDATED MODEL: gemini-2.5-flash
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction || `You are ELSHA, a helpful English tutor. The user's name is ${userName}. Keep responses concise, friendly, and correct their grammar if needed.` }] }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error.message || "Unknown API Error");
+                }
+                
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error(error);
+                return `Error: ${error.message}`;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user');
+            input.value = '';
+            
+            const typingId = addTypingIndicator();
+            const response = await callGeminiAPI(text);
+            removeTypingIndicator(typingId);
+            
+            addMessage(response, 'ai');
+            speakText(response);
+        }
+
+        function addMessage(text, sender) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            const isAI = sender === 'ai';
+            
+            div.className = `flex ${isAI ? 'justify-start' : 'justify-end'} mb-4`;
+            
+            const cleanText = text.replace(/\*\*/g, '');
+            const msgId = 'msg-' + Date.now();
+
+            // Use break-words and proper padding for mobile
+            let innerHTML = `<div class="max-w-[90%] md:max-w-[75%] p-3 md:p-4 ${isAI ? 'chat-bubble-ai text-white' : 'chat-bubble-user text-white'} shadow-md">
+                <p class="leading-relaxed text-sm md:text-base break-words" id="${msgId}">${cleanText}</p>`;
+
+            // "See Translation" Button
+            if (isAI) {
+                innerHTML += `
+                <div class="mt-2 pt-2 border-t border-white/20 flex flex-col gap-2">
+                    <button onclick="translateInline('${msgId}')" class="text-xs md:text-sm font-semibold text-white/70 hover:text-white text-left flex items-center transition active:scale-95 w-max">
+                        <i class="fas fa-language mr-1"></i> <span id="btn-${msgId}">See Translation</span>
+                    </button>
+                    <p id="trans-${msgId}" class="text-xs md:text-sm text-yellow-200 hidden italic break-words"></p>
+                </div>`;
+            }
+            
+            innerHTML += `</div>`;
+            div.innerHTML = innerHTML;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function translateInline(msgId) {
+            const transBox = document.getElementById(`trans-${msgId}`);
+            const btnSpan = document.getElementById(`btn-${msgId}`);
+            const originalText = document.getElementById(msgId).innerText;
+
+            if (!transBox.classList.contains('hidden')) {
+                transBox.classList.add('hidden');
+                btnSpan.innerText = "See Translation";
+                return;
+            }
+
+            if (transBox.innerText !== "") {
+                transBox.classList.remove('hidden');
+                btnSpan.innerText = "Hide Translation";
+                return;
+            }
+
+            btnSpan.innerText = "Translating...";
+            const prompt = `Translate the following English text to natural Indonesian language. Do not add any extra comments, just output the translation:\n\n"${originalText}"`;
+            
+            const translation = await callGeminiAPI(prompt, "You are a professional translator.");
+            
+            if(!translation.startsWith("Error")) {
+                transBox.innerText = translation;
+                transBox.classList.remove('hidden');
+                btnSpan.innerText = "Hide Translation";
+            } else {
+                btnSpan.innerText = "Translation Failed";
+            }
+        }
+
+        function addTypingIndicator() {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            const id = 'typing-' + Date.now();
+            div.id = id;
+            div.className = `flex justify-start mb-4`;
+            div.innerHTML = `<div class="p-3 md:p-4 chat-bubble-ai text-white/70 shadow-md text-sm md:text-base">
+                <i class="fas fa-circle-notch fa-spin mr-2"></i> ELSHA is typing...
+            </div>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if(el) el.remove();
+        }
+
+        // --- ROLEPLAY LOGIC ---
+        function startRoleplay(scenarioPrompt) {
+            switchTab('chat');
+            document.getElementById('chatBox').innerHTML = ''; 
+            addMessage("Roleplay started! Let's begin.", 'ai');
+            
+            setTimeout(async () => {
+                const typingId = addTypingIndicator();
+                const response = await callGeminiAPI("Hello, please start the roleplay based on your persona.", scenarioPrompt);
+                removeTypingIndicator(typingId);
+                addMessage(response, 'ai');
+                speakText(response);
+            }, 500);
+        }
+
+        // --- VOCAB GAME LOGIC ---
+        function nextWord() {
+            const currentVocabList = currentLevel === 1 ? vocabLevel1 : vocabLevel2;
+            
+            if (usedIndices.length >= currentVocabList.length) {
+                usedIndices = [];
+            }
+
+            let rnd;
+            do {
+                rnd = Math.floor(Math.random() * currentVocabList.length);
+            } while (usedIndices.includes(rnd));
+
+            usedIndices.push(rnd);
+            currentWordIndex = rnd;
+            
+            document.getElementById('wordToGuess').innerText = currentVocabList[currentWordIndex].en;
+            document.getElementById('gameInput').value = '';
+            document.getElementById('gameFeedback').innerText = '';
+        }
+
+        function checkWord() {
+            const currentVocabList = currentLevel === 1 ? vocabLevel1 : vocabLevel2;
+            const input = document.getElementById('gameInput').value.trim().toLowerCase();
+            const correctWord = currentVocabList[currentWordIndex].id.toLowerCase();
+            const feedback = document.getElementById('gameFeedback');
+
+            if (input === correctWord) {
+                feedback.innerText = "Correct! +10 Points 🌟";
+                feedback.className = "mt-4 text-xs md:text-sm font-semibold h-5 text-green-300";
+                currentScore += 10;
+                document.getElementById('scoreDisplay').innerText = currentScore;
+                
+                if (currentScore >= 100 && currentLevel === 1) {
+                    currentLevel = 2;
+                    usedIndices = []; 
+                    document.getElementById('levelDisplay').innerText = "Level 2";
+                    document.getElementById('levelDisplay').classList.replace("bg-white/20", "bg-red-500/80");
+                    alert("🎉 Congratulations! You reached 100 points and advanced to Level 2! Words will be harder now.");
+                }
+
+                const progress = Math.min((currentScore % 100) || (currentScore === 100 ? 100 : 0), 100);
+                document.getElementById('lvlProgress').style.width = `${progress}%`;
+
+                setTimeout(nextWord, 1000);
+            } else {
+                feedback.innerText = `Wrong! The correct answer is "${currentVocabList[currentWordIndex].id}" ❌`;
+                feedback.className = "mt-4 text-xs md:text-sm font-semibold h-5 text-red-300";
+            }
+        }
+
+        // --- SYSTEM DIAGNOSTICS LOGIC ---
+        async function runDiagnostics() {
+            const netIcon = document.getElementById('statusNetwork');
+            const keyIcon = document.getElementById('statusKey');
+            const pingIcon = document.getElementById('statusPing');
+
+            netIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+            keyIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+            pingIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+
+            // 1. Check Network
+            setTimeout(() => {
+                if (navigator.onLine) {
+                    netIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                } else {
+                    netIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                    pingIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-400"></i>';
+                    return; 
+                }
+            }, 500);
+
+            // 2. Check API Key Locally (Accepts AQ. and AIzaSy)
+            setTimeout(() => {
+                if (apiKey && (apiKey.startsWith("AIzaSy") || apiKey.startsWith("AQ."))) {
+                    keyIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                } else {
+                    keyIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                }
+            }, 1000);
+
+            // 3. Ping Gemini API
+            setTimeout(async () => {
+                if (!navigator.onLine || !apiKey) return;
+                
+                try {
+                    // UPDATED MODEL: gemini-2.5-flash
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
+                    });
+                    
+                    if (response.ok) {
+                        pingIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                    } else {
+                        const err = await response.json();
+                        console.error("API Error:", err);
+                        // Using text-xs for error message to prevent breaking layout
+                        pingIcon.innerHTML = `<div class="flex flex-col items-end"><i class="fas fa-times-circle text-red-400 mb-1"></i> <span class="text-[10px] md:text-xs text-red-300 leading-tight">${err.error.status || 'Failed'}</span></div>`;
+                    }
+                } catch (e) {
+                    pingIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                }
+            }, 1500);
+        }
+
+        // --- SPEECH RECOGNITION & TTS ---
+        function speakText(text) {
+            if (!synth) return;
+            const cleanText = text.replace(/[*#]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            if (femaleVoice) utterance.voice = femaleVoice;
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1; 
+            synth.speak(utterance);
+        }
+
+        function startVoiceRecognition(mode) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Your browser does not support Voice Recognition. Please use Chrome.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US'; 
+            recognition.start();
+            
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-microphone text-red-500 fa-beat"></i>';
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if(mode === 'chat') {
+                    document.getElementById('chatInput').value = transcript;
+                }
+                btn.innerHTML = originalHTML;
+            };
+
+            recognition.onerror = () => {
+                btn.innerHTML = originalHTML;
+            };
+            
+            recognition.onend = () => {
+                btn.innerHTML = originalHTML;
+            };
+        }
+    </script>
+</body>
+</html>
