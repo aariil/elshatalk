@@ -1,114 +1,906 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Master AI</title>
-  <style>
-    :root { --primary: #4F46E5; --bg-color: #F3F4F6; --chat-bg: #FFFFFF; --text-main: #1F2937; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .welcome-screen { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; }
-    .welcome-screen h1 { color: var(--primary); margin-bottom: 10px; }
-    .welcome-screen input { width: 100%; padding: 15px; border: 2px solid #E5E7EB; border-radius: 10px; margin-bottom: 20px; text-align: center; }
-    .welcome-screen button { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-    .app-container { width: 100%; max-width: 600px; height: 95vh; background: var(--chat-bg); border-radius: 20px; display: none; flex-direction: column; overflow: hidden; }
-    .header { background: var(--primary); color: white; text-align: center; padding: 20px; }
-    .level-tabs { display: flex; background: #E0E7FF; padding: 10px; justify-content: space-around; }
-    .level-btn { background: transparent; border: none; padding: 8px 15px; font-weight: bold; color: var(--primary); cursor: pointer; }
-    .level-btn.active { background: var(--primary); color: white; border-radius: 20px; }
-    .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #FAFAFA; }
-    .message { max-width: 85%; padding: 12px 18px; border-radius: 15px; line-height: 1.5; }
-    .message.ai { align-self: flex-start; background: white; border: 1px solid #E5E7EB; }
-    .message.user { align-self: flex-end; background: var(--primary); color: white; }
-    .btn-suara { display: inline-block; margin-top: 10px; background: #E0E7FF; color: var(--primary); border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; }
-    .input-area { display: flex; padding: 15px 20px; background: white; border-top: 1px solid #E5E7EB; gap: 10px; }
-    .input-area input { flex: 1; padding: 12px 15px; border: 1px solid #D1D5DB; border-radius: 25px; }
-    .mic-btn { background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; }
-    .input-area .send-btn { background: var(--primary); color: white; border: none; padding: 0 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <div class="welcome-screen" id="welcomeScreen">
-    <h1>English AI!</h1>
-    <input type="text" id="studentNameInput" placeholder="Siapa nama Anda?">
-    <button onclick="startApp()">Mulai Belajar</button>
-  </div>
-  <div class="app-container" id="appContainer">
-    <div class="header"><h1>English Master AI</h1></div>
-    <div class="level-tabs">
-      <button class="level-btn active" onclick="changeLevel('pemula', this)">Pemula</button>
-      <button class="level-btn" onclick="changeLevel('menengah', this)">Menengah</button>
-      <button class="level-btn" onclick="changeLevel('pro', this)">Pro</button>
-    </div>
-    <div class="chat-area" id="chatBox"></div>
-    <div class="input-area">
-      <button class="mic-btn" onclick="toggleMic()">🎤</button>
-      <input type="text" id="userInput" placeholder="Ketik pesan...">
-      <button class="send-btn" onclick="sendMessage()">Kirim</button>
-    </div>
-  </div>
-
-  <script>
-    const API_KEY = "AQ.Ab8RN6JmOY8YksNBcLrdtPlCx3D0e0OMD5jvNhjJEA-fJYgM1Q"; 
-    let currentLevel = 'pemula';
-    let studentName = '';
-    const levelInstructions = { pemula: "Guru bahasa Inggris pemula.", menengah: "Tutor menengah.", pro: "Advanced English coach." };
-
-    function startApp() {
-      studentName = document.getElementById('studentNameInput').value.trim() || "Siswa";
-      document.getElementById('welcomeScreen').style.display = 'none';
-      document.getElementById('appContainer').style.display = 'flex';
-      document.getElementById('chatBox').innerHTML = `<div class="message ai">Halo ${studentName}! Mari belajar.</div>`;
-    }
-
-    function changeLevel(level, btnElement) {
-      currentLevel = level;
-      document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
-      btnElement.classList.add('active');
-    }
-
-    function toggleMic() { alert("Mikrofon diklik. Fitur ini aman."); }
-
-    async function sendMessage() {
-      const inputField = document.getElementById('userInput');
-      const chatBox = document.getElementById('chatBox');
-      const text = inputField.value.trim();
-      if (!text) return;
-
-      chatBox.innerHTML += `<div class="message user">${text}</div>`;
-      inputField.value = '';
-      const loadingId = 'load-' + Date.now();
-      chatBox.innerHTML += `<div class="message ai" id="${loadingId}">...</div>`;
-      
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: levelInstructions[currentLevel] }] },
-            contents: [{ parts: [{ text: text }] }]
-          })
-        });
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELSHA - English AI Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
         
-        const data = await response.json();
-        
-        // Menangkap pesan error asli dari Google jika ada kegagalan
-        if (!response.ok) {
-          throw new Error(data.error ? data.error.message : "Gagal menghubungi server Google.");
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         }
 
-        const reply = data.candidates[0].content.parts[0].text;
-        document.getElementById(loadingId).remove();
-        chatBox.innerHTML += `<div class="message ai">${reply.replace(/\n/g, '<br>')}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } catch (error) {
-        document.getElementById(loadingId).remove();
-        // Menampilkan pesan error asli di layar aplikasi
-        chatBox.innerHTML += `<div class="message ai" style="color:red; border-color:red;"><b>INFO ERROR:</b> ${error.message}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    }
-  </script>
+        .chat-bubble-user {
+            background: rgba(99, 102, 241, 0.8);
+            border-bottom-right-radius: 0;
+        }
+
+        .chat-bubble-ai {
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom-left-radius: 0;
+        }
+
+        .hide { display: none !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+        
+        /* Mic pulsing animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .recording { animation: pulse-ring 2s infinite; background-color: #ef4444 !important; }
+    </style>
+</head>
+<body class="antialiased flex items-center justify-center p-4">
+
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="glass-panel rounded-2xl p-8 max-w-md w-full text-center transition-all duration-500">
+        <div class="mb-6 flex justify-center">
+            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-4xl shadow-lg">
+                🤖
+            </div>
+        </div>
+        <h1 class="text-3xl font-bold mb-2 tracking-wide">ELSHA</h1>
+        <p class="text-white/80 mb-8 text-sm">Your Personal English AI Tutor</p>
+        
+        <div class="space-y-4">
+            <div class="relative">
+                <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" 
+                       class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all">
+            </div>
+            <button onclick="app.startApp()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all transform hover:scale-105">
+                Start Learning <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="mainApp" class="hide glass-panel rounded-2xl w-full max-w-4xl h-[85vh] flex flex-col md:flex-row overflow-hidden shadow-2xl relative">
+        
+        <!-- Sidebar / Navigation -->
+        <div class="w-full md:w-64 bg-black/20 flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/10 p-4">
+            <div>
+                <div class="flex items-center gap-3 mb-8 px-2 mt-2">
+                    <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center font-bold">E</div>
+                    <div>
+                        <h2 class="font-bold text-lg leading-tight">ELSHA</h2>
+                        <p class="text-xs text-white/60" id="greetingName">Hi, User!</p>
+                    </div>
+                </div>
+
+                <nav class="space-y-2">
+                    <button onclick="app.switchTab('chat')" id="nav-chat" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 font-medium transition-all text-left">
+                        <i class="fas fa-comments w-5 text-center"></i> Free Chat
+                    </button>
+                    <button onclick="app.switchTab('roleplay')" id="nav-roleplay" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 text-white/80 font-medium transition-all text-left">
+                        <i class="fas fa-user-friends w-5 text-center"></i> Roleplay
+                    </button>
+                    <button onclick="app.switchTab('challenge')" id="nav-challenge" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 text-white/80 font-medium transition-all text-left">
+                        <i class="fas fa-dumbbell w-5 text-center"></i> Translation
+                    </button>
+                    <button onclick="app.switchTab('translator')" id="nav-translator" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 text-white/80 font-medium transition-all text-left">
+                        <i class="fas fa-book w-5 text-center"></i> Dictionary
+                    </button>
+                    <button onclick="app.switchTab('game')" id="nav-game" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 text-white/80 font-medium transition-all text-left">
+                        <i class="fas fa-gamepad w-5 text-center"></i> Vocab Game
+                    </button>
+                </nav>
+            </div>
+            
+            <button onclick="app.logout()" class="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-white/5 rounded-xl transition-all text-sm mt-4 md:mt-0">
+                <i class="fas fa-sign-out-alt"></i> Exit
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 flex flex-col relative h-full">
+            
+            <!-- Chat View -->
+            <div id="view-chat" class="view-section flex flex-col h-full absolute inset-0">
+                <div class="p-4 border-b border-white/10 bg-black/10 flex justify-between items-center z-10 backdrop-blur-md">
+                    <h3 class="font-semibold"><i class="fas fa-robot mr-2"></i> English Conversation</h3>
+                    <button onclick="app.toggleTTS()" id="ttsToggle" class="text-indigo-300 hover:text-white" title="Toggle AI Voice">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                </div>
+                
+                <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
+                    <!-- Messages will appear here -->
+                </div>
+
+                <div class="p-4 bg-black/20 border-t border-white/10 absolute bottom-0 w-full flex items-end gap-2 backdrop-blur-lg">
+                    <button id="micBtn" onclick="app.toggleMic('chat')" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all shrink-0">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <textarea id="chatInput" rows="1" placeholder="Type or speak..." 
+                        class="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-indigo-400 resize-none overflow-hidden h-[42px]"
+                        oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+                    <button onclick="app.sendChatMessage()" class="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center transition-all shrink-0 shadow-lg">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Roleplay View -->
+            <div id="view-roleplay" class="view-section hide flex flex-col h-full absolute inset-0 bg-black/10">
+                <div id="roleplaySelector" class="p-6 h-full overflow-y-auto">
+                    <h3 class="font-bold text-2xl mb-2"><i class="fas fa-theater-masks mr-2"></i> Roleplay Scenarios</h3>
+                    <p class="text-white/70 mb-6 text-sm">Practice real-life English in specific situations.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="app.startRoleplay('restaurant')" class="glass-panel p-6 rounded-2xl hover:bg-white/10 transition-all text-left flex flex-col gap-3 group">
+                            <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform"><i class="fas fa-utensils text-xl"></i></div>
+                            <h4 class="font-bold text-lg">Restaurant Waiter</h4>
+                            <p class="text-xs text-white/60">Order Ramen with a soft-boiled egg cut in half, or Bakso with yellow noodles.</p>
+                        </button>
+                        <button onclick="app.startRoleplay('bicycle')" class="glass-panel p-6 rounded-2xl hover:bg-white/10 transition-all text-left flex flex-col gap-3 group">
+                            <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform"><i class="fas fa-bicycle text-xl"></i></div>
+                            <h4 class="font-bold text-lg">Bicycle Trip</h4>
+                            <p class="text-xs text-white/60">Ask for directions in the mountains and talk about trees and rivers.</p>
+                        </button>
+                        <button onclick="app.startRoleplay('design')" class="glass-panel p-6 rounded-2xl hover:bg-white/10 transition-all text-left flex flex-col gap-3 group md:col-span-2">
+                            <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform"><i class="fas fa-palette text-xl"></i></div>
+                            <h4 class="font-bold text-lg">Design Client</h4>
+                            <p class="text-xs text-white/60">Discuss a logistics logo design and an 'Off Day' status notice.</p>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="roleplayActive" class="hide flex flex-col h-full absolute inset-0">
+                    <div class="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center z-10 backdrop-blur-md">
+                        <div class="flex items-center gap-3">
+                            <button onclick="app.exitRoleplay()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all text-white"><i class="fas fa-arrow-left text-sm"></i></button>
+                            <h3 class="font-semibold" id="roleplayTitle">Scenario</h3>
+                        </div>
+                    </div>
+                    
+                    <div id="roleplayBox" class="flex-1 overflow-y-auto p-4 space-y-4 pb-20"></div>
+
+                    <div class="p-4 bg-black/20 border-t border-white/10 absolute bottom-0 w-full flex items-end gap-2 backdrop-blur-lg">
+                        <button id="rpMicBtn" onclick="app.toggleMic('roleplay')" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all shrink-0"><i class="fas fa-microphone"></i></button>
+                        <textarea id="rpInput" rows="1" placeholder="Reply to the scenario..." class="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-indigo-400 resize-none h-[42px]" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+                        <button onclick="app.sendRoleplayMessage()" class="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center transition-all shrink-0"><i class="fas fa-paper-plane text-sm"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Translation Challenge View -->
+            <div id="view-challenge" class="view-section hide flex flex-col h-full absolute inset-0 p-6 overflow-y-auto">
+                <h3 class="font-bold text-2xl mb-6"><i class="fas fa-dumbbell mr-2"></i> Translation Challenge</h3>
+                
+                <div class="glass-panel p-6 rounded-2xl flex-1 flex flex-col">
+                    <div class="mb-6">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 mb-2 block">Translate this to English:</span>
+                        <p id="challengeText" class="text-xl font-medium leading-relaxed bg-black/20 p-4 rounded-xl border border-white/10">...</p>
+                    </div>
+                    
+                    <div class="relative flex-1 min-h-[120px] mb-4">
+                        <textarea id="challengeInput" placeholder="Type or speak your English translation here..." 
+                            class="w-full h-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"></textarea>
+                        <button id="chalMicBtn" onclick="app.toggleMic('challenge')" class="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center transition-all">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="app.submitChallenge()" class="w-full bg-indigo-500 hover:bg-indigo-600 py-3 rounded-xl font-semibold shadow-lg transition-all mb-4">
+                        Submit Translation
+                    </button>
+
+                    <div id="challengeFeedback" class="hide bg-black/30 rounded-xl p-5 border border-white/10 mt-2">
+                        <h4 class="font-bold text-sm text-indigo-300 mb-2"><i class="fas fa-check-circle mr-1"></i> ELSHA's Feedback:</h4>
+                        <div id="challengeGrade" class="text-sm text-white/90 leading-relaxed mb-4"></div>
+                        <button onclick="app.nextChallenge()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all text-sm font-medium">Next Challenge <i class="fas fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Translator View -->
+            <div id="view-translator" class="view-section hide flex flex-col h-full absolute inset-0 p-6 overflow-y-auto">
+                <h3 class="font-bold text-xl mb-6"><i class="fas fa-language mr-2"></i> Smart Translator</h3>
+                
+                <div class="flex-1 flex flex-col gap-4">
+                    <div class="flex items-center justify-between bg-black/20 p-2 rounded-xl border border-white/10">
+                        <span id="transSourceLabel" class="px-3 font-medium text-indigo-300">Indonesian</span>
+                        <button onclick="app.swapLanguages()" class="p-2 hover:bg-white/10 rounded-lg transition-all text-white"><i class="fas fa-exchange-alt"></i></button>
+                        <span id="transTargetLabel" class="px-3 font-medium text-green-300">English</span>
+                    </div>
+
+                    <div class="relative flex-1 min-h-[150px]">
+                        <textarea id="transInput" placeholder="Enter text to translate..." 
+                            class="w-full h-full bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"></textarea>
+                        <button id="transMicBtn" onclick="app.toggleMic('trans')" class="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center transition-all">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="app.translateText()" class="w-full bg-indigo-500 hover:bg-indigo-600 py-3 rounded-xl font-semibold shadow-lg transition-all">
+                        Translate
+                    </button>
+
+                    <div class="relative flex-1 min-h-[150px]">
+                        <textarea id="transOutput" readonly placeholder="Translation will appear here..." 
+                            class="w-full h-full bg-black/20 border border-white/10 rounded-xl p-4 text-white placeholder-white/40 resize-none focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game View -->
+            <div id="view-game" class="view-section hide flex flex-col h-full absolute inset-0 p-6 items-center justify-center">
+                <div class="text-center w-full max-w-md">
+                    <h3 class="font-bold text-2xl mb-2"><i class="fas fa-gamepad mr-2"></i> Guess the Word</h3>
+                    <p class="text-white/70 text-sm mb-8">Translate the word correctly to score points!</p>
+
+                    <div class="bg-black/20 border border-white/10 rounded-2xl p-8 mb-6 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-2 right-4 text-xs font-bold text-indigo-300">Score: <span id="gameScore">0</span></div>
+                        <p class="text-sm text-white/50 mb-1 uppercase tracking-wider font-semibold" id="gameDirection">IND -> ENG</p>
+                        <h2 class="text-4xl font-bold mb-6 tracking-wide" id="gameWord">Word</h2>
+                        
+                        <form onsubmit="event.preventDefault(); app.checkGameAnswer();" class="flex gap-2">
+                            <input type="text" id="gameInput" autocomplete="off" placeholder="Your answer..." 
+                                class="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            <button type="submit" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-xl font-semibold shadow-lg transition-all">
+                                Check
+                            </button>
+                        </form>
+                        <p id="gameFeedback" class="mt-4 text-sm font-medium h-5 transition-opacity"></p>
+                    </div>
+                    <button onclick="app.initGame()" class="text-sm text-white/60 hover:text-white underline">Skip Word</button>
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="hide absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-r-2xl">
+                <div class="w-12 h-12 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-sm font-medium animate-pulse" id="loadingText">ELSHA is thinking...</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const apiKey = "YOUR_GEMINI_API_KEY"; // Replace with your actual Gemini API Key
+        
+        let db, auth, userId;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'elsha-default-id';
+        let firebaseApp;
+        
+        const app = {
+            state: {
+                userName: '',
+                ttsEnabled: true,
+                isRecording: false,
+                chatHistory: [],
+                rpHistory: [],
+                currentRpId: null,
+                challengeIdx: 0,
+                transDirection: 'id-en',
+                score: 0,
+                currentWord: null,
+                recognition: null,
+                activeMicContext: null
+            },
+            
+            scenarios: {
+                restaurant: {
+                    title: "Restaurant Waiter",
+                    sysPrompt: "You are a friendly waiter at a restaurant. The user is a customer trying to order food in English. The user's goal is to order 'Ramen with a soft-boiled egg cut in half' or 'Bakso with yellow noodles'. Do not offer these specific items directly, let the user try to describe or ask for them. Start by welcoming them to the restaurant.",
+                    firstMessage: "Welcome to our restaurant! Here is the menu. What would you like to order today?"
+                },
+                bicycle: {
+                    title: "Mountain Local",
+                    sysPrompt: "You are a friendly local resident in a beautiful mountainous area. The user is on a bicycle trip and needs to ask for directions. They also want to talk about the beautiful trees and rivers in the area. Start by greeting them as they cycle by.",
+                    firstMessage: "Hello there! Beautiful day for a bike ride, isn't it? Do you need any help with directions around these mountains?"
+                },
+                design: {
+                    title: "Design Client",
+                    sysPrompt: "You are a client looking for a freelance graphic designer. You want a logo design for your new courier/logistics company. You also need a simple 'Off Day' status notice designed for your shop front. The user is the designer. Start by explaining your project.",
+                    firstMessage: "Hi! I heard you're a great designer. I need a logo for my new courier logistics company, and also an 'Off Day' notice sign. Can we discuss this?"
+                }
+            },
+            
+            challenges: [
+                "Jelaskan konsep wanprestasi dan kompensasi dalam kontrak.",
+                "Apa penyebab rantai sepeda sering keluar dari pulley RD?",
+                "Saya sedang mencari video musik animasi tentang cerita pesawat kertas."
+            ],
+
+            vocabList: [
+                { id: "buku", en: "book" }, { id: "mobil", en: "car" }, { id: "kucing", en: "cat" },
+                { id: "anjing", en: "dog" }, { id: "rumah", en: "house" }, { id: "sekolah", en: "school" },
+                { id: "makan", en: "eat" }, { id: "minum", en: "drink" }, { id: "tidur", en: "sleep" },
+                { id: "air", en: "water" }, { id: "api", en: "fire" }, { id: "pohon", en: "tree" },
+                { id: "teman", en: "friend" }, { id: "bahagia", en: "happy" }, { id: "sedih", en: "sad" }
+            ],
+
+            async init() {
+                // Setup Firebase
+                try {
+                    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                    if (firebaseConfig) {
+                        firebaseApp = initializeApp(firebaseConfig);
+                        db = getFirestore(firebaseApp);
+                        auth = getAuth(firebaseApp);
+                        
+                        this.showLoading(true, "Connecting to ELSHA...");
+                        if (typeof __initial_auth_token !== 'undefined') {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                        userId = auth.currentUser?.uid;
+                        
+                        await this.loadUserData();
+                        this.showLoading(false);
+                    }
+                } catch(e) {
+                    console.error("Firebase init failed", e);
+                    this.showLoading(false);
+                }
+
+                // Setup Enter key for chat
+                document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendChatMessage();
+                    }
+                });
+
+                // Setup Speech Recognition
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    this.state.recognition = new SpeechRecognition();
+                    this.state.recognition.continuous = false;
+                    this.state.recognition.interimResults = false;
+                    
+                    this.state.recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        if(this.state.activeMicContext === 'chat') {
+                            document.getElementById('chatInput').value = transcript;
+                            this.sendChatMessage();
+                        } else if(this.state.activeMicContext === 'trans') {
+                            document.getElementById('transInput').value = transcript;
+                        } else if(this.state.activeMicContext === 'roleplay') {
+                            document.getElementById('rpInput').value = transcript;
+                            this.sendRoleplayMessage();
+                        } else if(this.state.activeMicContext === 'challenge') {
+                            document.getElementById('challengeInput').value = transcript;
+                        }
+                    };
+
+                    this.state.recognition.onend = () => {
+                        this.stopRecordingUI();
+                    };
+                    
+                    this.state.recognition.onerror = (e) => {
+                        console.error('Speech recognition error', e);
+                        this.stopRecordingUI();
+                        this.showToast("Microphone error. Please check permissions.");
+                    };
+                }
+            },
+
+            async loadUserData() {
+                if (!userId) return false;
+                const profileRef = doc(db, 'artifacts', appId, 'users', userId, 'elsha_data', 'profile');
+                const chatRef = doc(db, 'artifacts', appId, 'users', userId, 'elsha_data', 'chat');
+                
+                try {
+                    const [profileSnap, chatSnap] = await Promise.all([getDoc(profileRef), getDoc(chatRef)]);
+                    
+                    if (profileSnap.exists()) {
+                        this.state.userName = profileSnap.data().name;
+                        document.getElementById('greetingName').innerText = `Hi, ${this.state.userName}!`;
+                        document.getElementById('welcomeScreen').classList.add('hide');
+                        document.getElementById('mainApp').classList.remove('hide');
+                        this.initGame();
+
+                        if (chatSnap.exists() && chatSnap.data().history) {
+                            this.state.chatHistory = chatSnap.data().history;
+                            this.state.chatHistory.forEach(msg => {
+                                this.renderChatBubble(msg.role, msg.text, 'chatBox');
+                            });
+                        } else {
+                            this.state.chatHistory = [];
+                            await this.appendMessage('ai', `Hello ${this.state.userName}! Welcome back to ELSHA. Let's continue practicing!`, 'chatBox', this.state.chatHistory);
+                        }
+                        
+                        this.loadChallenge(); // Load first challenge
+                        return true;
+                    }
+                } catch(e) {
+                    console.error("Failed to load user data", e);
+                }
+                return false;
+            },
+
+            async startApp() {
+                const nameInput = document.getElementById('userNameInput').value.trim();
+                if (!nameInput) {
+                    this.showToast("Please enter your name to start.");
+                    return;
+                }
+                this.state.userName = nameInput;
+                document.getElementById('greetingName').innerText = `Hi, ${this.state.userName}!`;
+                
+                if (userId) {
+                    const profileRef = doc(db, 'artifacts', appId, 'users', userId, 'elsha_data', 'profile');
+                    await setDoc(profileRef, { name: this.state.userName });
+                }
+                
+                document.getElementById('welcomeScreen').classList.add('hide');
+                document.getElementById('mainApp').classList.remove('hide');
+                
+                // Initial AI Greeting
+                this.state.chatHistory = [];
+                await this.appendMessage('ai', `Hello ${this.state.userName}! I am ELSHA, your English AI tutor. How can I help you practice your English today?`, 'chatBox', this.state.chatHistory);
+                this.speak(`Hello ${this.state.userName}! I am ELSHA, your English A I tutor.`);
+                
+                this.initGame();
+                this.loadChallenge();
+            },
+
+            logout() {
+                document.getElementById('mainApp').classList.add('hide');
+                document.getElementById('welcomeScreen').classList.remove('hide');
+                document.getElementById('userNameInput').value = '';
+                this.state.userName = '';
+                this.state.chatHistory = [];
+                this.state.rpHistory = [];
+                document.getElementById('chatBox').innerHTML = '';
+                document.getElementById('roleplayBox').innerHTML = '';
+                window.speechSynthesis.cancel();
+            },
+
+            switchTab(tabId) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+                document.getElementById(`view-${tabId}`).classList.remove('hide');
+                
+                document.querySelectorAll('.nav-btn').forEach(el => {
+                    el.classList.remove('bg-white/20', 'text-white');
+                    el.classList.add('hover:bg-white/10', 'text-white/80');
+                });
+                
+                const activeNav = document.getElementById(`nav-${tabId}`);
+                activeNav.classList.add('bg-white/20', 'text-white');
+                activeNav.classList.remove('hover:bg-white/10', 'text-white/80');
+            },
+
+            showToast(msg) {
+                // simple custom alert replacement
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-red-500/90 backdrop-blur text-white px-6 py-3 rounded-xl shadow-lg z-50 transform transition-all translate-y-[-100%] opacity-0';
+                toast.innerText = msg;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-[-100%]', 'opacity-0');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+
+            showLoading(show, text = "ELSHA is thinking...") {
+                const overlay = document.getElementById('loadingOverlay');
+                document.getElementById('loadingText').innerText = text;
+                if(show) overlay.classList.remove('hide');
+                else overlay.classList.add('hide');
+            },
+
+            async callGemini(prompt, systemInstruction) {
+                if (!apiKey) {
+                    this.showToast("API Key is missing. Canvas environment required.");
+                    return null;
+                }
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] }
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0].content) {
+                        return result.candidates[0].content.parts[0].text;
+                    }
+                    throw new Error("Invalid response");
+                } catch (error) {
+                    console.error(error);
+                    this.showToast("Connection to ELSHA failed. Try again.");
+                    return null;
+                }
+            },
+
+            async sendChatMessage() {
+                const inputEl = document.getElementById('chatInput');
+                const text = inputEl.value.trim();
+                if(!text) return;
+
+                inputEl.value = '';
+                inputEl.style.height = '42px'; // reset height
+                
+                await this.appendMessage('user', text);
+                this.showLoading(true);
+
+                // Build conversation context (keep only last few for context limits)
+                const historyContext = this.state.chatHistory.slice(-6).map(m => `${m.role === 'user' ? this.state.userName : 'ELSHA'}: ${m.text}`).join('\n');
+                const prompt = `Conversation history:\n${historyContext}\n\n${this.state.userName}: ${text}`;
+                
+                const sysPrompt = `You are ELSHA (English AI), a friendly and encouraging English language tutor. 
+                The user's name is ${this.state.userName}. 
+                Keep your answers conversational, concise (1-3 short paragraphs), and helpful for learning English. 
+                If they speak in Indonesian, gently reply in English or a mix to help them learn, translating if necessary. 
+                Correct obvious grammar mistakes politely. Do not use emojis frequently as text-to-speech will read them weirdly.`;
+
+                const responseText = await this.callGemini(prompt, sysPrompt);
+                this.showLoading(false);
+
+                if (responseText) {
+                    await this.appendMessage('ai', responseText, 'chatBox', this.state.chatHistory);
+                    this.speak(responseText);
+                }
+            },
+            
+            // --- ROLEPLAY LOGIC ---
+            async startRoleplay(scenarioId) {
+                this.state.currentRpId = scenarioId;
+                this.state.rpHistory = [];
+                document.getElementById('roleplayBox').innerHTML = '';
+                
+                const scenario = this.scenarios[scenarioId];
+                document.getElementById('roleplayTitle').innerText = scenario.title;
+                
+                document.getElementById('roleplaySelector').classList.add('hide');
+                document.getElementById('roleplayActive').classList.remove('hide');
+                
+                await this.appendMessage('ai', scenario.firstMessage, 'roleplayBox', this.state.rpHistory);
+                this.speak(scenario.firstMessage);
+            },
+            
+            exitRoleplay() {
+                document.getElementById('roleplayActive').classList.add('hide');
+                document.getElementById('roleplaySelector').classList.remove('hide');
+                this.state.currentRpId = null;
+                window.speechSynthesis.cancel();
+            },
+
+            async sendRoleplayMessage() {
+                const inputEl = document.getElementById('rpInput');
+                const text = inputEl.value.trim();
+                if(!text) return;
+
+                inputEl.value = '';
+                inputEl.style.height = '42px';
+                
+                await this.appendMessage('user', text, 'roleplayBox', this.state.rpHistory);
+                this.showLoading(true, "Roleplaying...");
+
+                const scenario = this.scenarios[this.state.currentRpId];
+                const historyContext = this.state.rpHistory.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'You'}: ${m.text}`).join('\n');
+                const prompt = `Conversation history:\n${historyContext}\n\nUser: ${text}`;
+                
+                const sysPrompt = `${scenario.sysPrompt} Keep responses relatively short, natural, and conversational. Correct any major English mistakes politely at the end of your response in a side note like "(Tip: ...)".`;
+
+                const responseText = await this.callGemini(prompt, sysPrompt);
+                this.showLoading(false);
+
+                if (responseText) {
+                    await this.appendMessage('ai', responseText, 'roleplayBox', this.state.rpHistory);
+                    this.speak(responseText);
+                }
+            },
+            
+            // --- TRANSLATION CHALLENGE LOGIC ---
+            loadChallenge() {
+                const text = this.challenges[this.state.challengeIdx];
+                document.getElementById('challengeText').innerText = text;
+                document.getElementById('challengeInput').value = '';
+                document.getElementById('challengeFeedback').classList.add('hide');
+            },
+            
+            async submitChallenge() {
+                const input = document.getElementById('challengeInput').value.trim();
+                if(!input) {
+                    this.showToast("Please enter your translation first.");
+                    return;
+                }
+                
+                const originalText = this.challenges[this.state.challengeIdx];
+                this.showLoading(true, "Grading your translation...");
+                
+                const prompt = `Indonesian Sentence: "${originalText}"\nUser's English Translation: "${input}"`;
+                const sysPrompt = `You are a strict but helpful English teacher. 
+                Grade the user's translation. 
+                1. Give it a score out of 100. 
+                2. Explain any grammar or vocabulary mistakes clearly. 
+                3. Provide the most natural, native-sounding English translation as the correct answer. 
+                Keep formatting simple (no markdown headers, just bolding and bullet points if needed).`;
+
+                const responseText = await this.callGemini(prompt, sysPrompt);
+                this.showLoading(false);
+                
+                if (responseText) {
+                    const fbDiv = document.getElementById('challengeFeedback');
+                    const gradeBox = document.getElementById('challengeGrade');
+                    
+                    let formattedText = responseText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                    formattedText = formattedText.replace(/\n/g, '<br>');
+                    
+                    gradeBox.innerHTML = formattedText;
+                    fbDiv.classList.remove('hide');
+                    this.speak("Here is my feedback on your translation.");
+                }
+            },
+            
+            nextChallenge() {
+                this.state.challengeIdx = (this.state.challengeIdx + 1) % this.challenges.length;
+                this.loadChallenge();
+            },
+
+            async appendMessage(role, text, boxId = 'chatBox', historyArray = this.state.chatHistory) {
+                historyArray.push({role, text});
+                this.renderChatBubble(role, text, boxId);
+                
+                // Save to Firebase (only main chat for now to save quota)
+                if (userId && boxId === 'chatBox') {
+                    try {
+                        const chatRef = doc(db, 'artifacts', appId, 'users', userId, 'elsha_data', 'chat');
+                        await setDoc(chatRef, { history: this.state.chatHistory });
+                    } catch(e) {
+                        console.error("Error saving chat history", e);
+                    }
+                }
+            },
+
+            renderChatBubble(role, text, boxId = 'chatBox') {
+                const chatBox = document.getElementById(boxId);
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+                
+                const bubble = document.createElement('div');
+                bubble.className = `max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-md ${role === 'user' ? 'chat-bubble-user text-white' : 'chat-bubble-ai border border-white/10'}`;
+                
+                // simple markdown bold handling
+                let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                bubble.innerHTML = formattedText;
+                
+                wrapper.appendChild(bubble);
+                chatBox.appendChild(wrapper);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            },
+
+            toggleTTS() {
+                this.state.ttsEnabled = !this.state.ttsEnabled;
+                const btn = document.getElementById('ttsToggle');
+                if(this.state.ttsEnabled) {
+                    btn.classList.replace('text-white/40', 'text-indigo-300');
+                    btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                } else {
+                    btn.classList.replace('text-indigo-300', 'text-white/40');
+                    btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    window.speechSynthesis.cancel();
+                }
+            },
+
+            speak(text) {
+                if(!this.state.ttsEnabled || !window.speechSynthesis) return;
+                window.speechSynthesis.cancel(); // stop current speaking
+                
+                // Clean text from markdown for better speech
+                const cleanText = text.replace(/\*/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                
+                const voices = window.speechSynthesis.getVoices();
+                let selectedVoice = null;
+                
+                // Prioritize known high-quality natural female voices
+                const preferredVoices = ['Google UK English Female', 'Google US English', 'Microsoft Zira', 'Samantha', 'Victoria'];
+                
+                // 1. Try to find one of the preferred voices
+                for (const pref of preferredVoices) {
+                    selectedVoice = voices.find(v => v.name.includes(pref));
+                    if (selectedVoice) break;
+                }
+                
+                // 2. Fallback to any English voice containing "Female" in its name
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(v => v.name.toLowerCase().includes('female') && v.lang.startsWith('en'));
+                }
+                
+                // 3. Final fallback: the first available English voice
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(v => v.lang.startsWith('en'));
+                }
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                } else {
+                    utterance.lang = 'en-US'; // System default fallback
+                }
+
+                // Adjust rate and pitch to sound more human and less robotic
+                utterance.rate = 0.95; // Slightly slower for clear learning
+                utterance.pitch = 1.1; // Slightly higher pitch for a more natural tone
+                
+                window.speechSynthesis.speak(utterance);
+            },
+
+            toggleMic(context) {
+                if (!this.state.recognition) {
+                    this.showToast("Voice recognition not supported in this browser.");
+                    return;
+                }
+
+                if (this.state.isRecording) {
+                    this.state.recognition.stop();
+                    return;
+                }
+
+                this.state.activeMicContext = context;
+                const lang = (context === 'trans' && this.state.transDirection === 'id-en') ? 'id-ID' : 'en-US';
+                this.state.recognition.lang = lang;
+                
+                try {
+                    this.state.recognition.start();
+                    this.state.isRecording = true;
+                    
+                    let btnId = 'micBtn';
+                    if(context === 'trans') btnId = 'transMicBtn';
+                    if(context === 'roleplay') btnId = 'rpMicBtn';
+                    if(context === 'challenge') btnId = 'chalMicBtn';
+                    
+                    document.getElementById(btnId).classList.add('recording');
+                } catch(e) {
+                    console.error(e);
+                }
+            },
+
+            stopRecordingUI() {
+                this.state.isRecording = false;
+                document.getElementById('micBtn').classList.remove('recording');
+                document.getElementById('transMicBtn').classList.remove('recording');
+                const rpMic = document.getElementById('rpMicBtn');
+                if(rpMic) rpMic.classList.remove('recording');
+                const chalMic = document.getElementById('chalMicBtn');
+                if(chalMic) chalMic.classList.remove('recording');
+            },
+
+            swapLanguages() {
+                this.state.transDirection = this.state.transDirection === 'id-en' ? 'en-id' : 'id-en';
+                const sLabel = document.getElementById('transSourceLabel');
+                const tLabel = document.getElementById('transTargetLabel');
+                
+                if (this.state.transDirection === 'id-en') {
+                    sLabel.innerText = 'Indonesian';
+                    sLabel.className = 'px-3 font-medium text-indigo-300';
+                    tLabel.innerText = 'English';
+                    tLabel.className = 'px-3 font-medium text-green-300';
+                } else {
+                    sLabel.innerText = 'English';
+                    sLabel.className = 'px-3 font-medium text-green-300';
+                    tLabel.innerText = 'Indonesian';
+                    tLabel.className = 'px-3 font-medium text-indigo-300';
+                }
+                
+                // Swap textarea contents
+                const inEl = document.getElementById('transInput');
+                const outEl = document.getElementById('transOutput');
+                const temp = inEl.value;
+                inEl.value = outEl.value;
+                outEl.value = ''; // Clear output until translate is clicked
+            },
+
+            async translateText() {
+                const text = document.getElementById('transInput').value.trim();
+                if(!text) return;
+
+                this.showLoading(true);
+                const isIdToEn = this.state.transDirection === 'id-en';
+                const sysPrompt = `You are a highly accurate translation engine. 
+                Translate the following text from ${isIdToEn ? 'Indonesian to English' : 'English to Indonesian'}. 
+                Provide ONLY the direct translation, without any conversational filler or formatting.`;
+                
+                const result = await this.callGemini(text, sysPrompt);
+                this.showLoading(false);
+                
+                if (result) {
+                    document.getElementById('transOutput').value = result;
+                }
+            },
+
+            initGame() {
+                const rInt = Math.floor(Math.random() * this.vocabList.length);
+                this.state.currentWord = this.vocabList[rInt];
+                
+                // Randomize direction
+                this.state.gameDirection = Math.random() > 0.5 ? 'id-en' : 'en-id';
+                
+                const dirLabel = document.getElementById('gameDirection');
+                const wordLabel = document.getElementById('gameWord');
+                
+                if (this.state.gameDirection === 'id-en') {
+                    dirLabel.innerText = 'Indonesian -> English';
+                    wordLabel.innerText = this.state.currentWord.id;
+                } else {
+                    dirLabel.innerText = 'English -> Indonesian';
+                    wordLabel.innerText = this.state.currentWord.en;
+                }
+                
+                document.getElementById('gameInput').value = '';
+                document.getElementById('gameInput').focus();
+                
+                const feedback = document.getElementById('gameFeedback');
+                feedback.innerText = '';
+                feedback.className = 'mt-4 text-sm font-medium h-5 transition-opacity opacity-0';
+            },
+
+            checkGameAnswer() {
+                const input = document.getElementById('gameInput').value.trim().toLowerCase();
+                if(!input) return;
+
+                const correctAns = this.state.gameDirection === 'id-en' ? this.state.currentWord.en.toLowerCase() : this.state.currentWord.id.toLowerCase();
+                const feedback = document.getElementById('gameFeedback');
+                feedback.classList.remove('opacity-0');
+
+                if (input === correctAns) {
+                    this.state.score += 10;
+                    document.getElementById('gameScore').innerText = this.state.score;
+                    feedback.innerText = 'Correct! +10 Points 🌟';
+                    feedback.classList.add('text-green-400');
+                    feedback.classList.remove('text-red-400');
+                    
+                    // small delay before next word
+                    setTimeout(() => this.initGame(), 1000);
+                } else {
+                    feedback.innerText = `Incorrect. The answer was "${correctAns}" 😢`;
+                    feedback.classList.add('text-red-400');
+                    feedback.classList.remove('text-green-400');
+                    
+                    // slightly longer delay to read the correct answer
+                    setTimeout(() => this.initGame(), 2000);
+                }
+            }
+        };
+
+        // Expose app to global scope for HTML event handlers
+        window.app = app;
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
 </body>
 </html>
