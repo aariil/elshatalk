@@ -291,7 +291,7 @@
             document.getElementById('userInitial').innerText = userName.charAt(0).toUpperCase();
             
             if(chatHistory.length === 0) {
-                addMessage(`Hello ${userName}! I am ELSHA, your English AI tutor powered by Gemini Flash. Let's practice!`, 'ai');
+                addMessage(`Hello ${userName}! I am ELSHA, your English AI tutor. Let's practice!`, 'ai');
             }
         }
 
@@ -330,33 +330,77 @@
             if(tabId === 'status') runDiagnostics();
         }
 
+        // --- INI ADALAH KODE BARU ANDA YANG SUDAH DIMASUKKAN ---
         async function callGeminiAPI(prompt, systemInstruction = "") {
-            // UPDATED MODEL: gemini-3.8-flash (Model gratis & stabil untuk API Key)
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+            const model = "gemini-3.8-flash";
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000);
+
             const payload = {
-                contents: [{ parts: [{ text: prompt }] }],
-                systemInstruction: { parts: [{ text: systemInstruction || `You are ELSHA, a helpful English tutor. The user's name is ${userName}. Keep responses concise, friendly, and correct their grammar if needed.` }] }
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{ text: prompt }]
+                    }
+                ],
+                systemInstruction: {
+                    parts: [{
+                        text: systemInstruction ||
+                            `You are ELSHA, a friendly English tutor.
+                            The user's name is ${userName}.
+                            Help the user practice English and gently
+                            correct grammar mistakes.`
+                    }]
+                }
             };
 
             try {
                 const response = await fetch(url, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-goog-api-key": apiKey
+                    },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
-                
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error.message || "Unknown API Error");
-                }
-                
+
                 const data = await response.json();
-                return data.candidates[0].content.parts[0].text;
+
+                if (!response.ok) {
+                    const message = data?.error?.message || "Unknown API error";
+                    console.error("Gemini API:", response.status, data);
+                    return `API Error (${response.status}): ${message}`;
+                }
+
+                const answer = data?.candidates?.[0]?.content?.parts
+                        ?.map(part => part.text || "")
+                        .join("");
+
+                if (!answer) {
+                    console.error("Unexpected Gemini response:", data);
+                    return "ELSHA received an empty response. Please try again.";
+                }
+
+                return answer;
+
             } catch (error) {
-                console.error(error);
-                return `Error: ${error.message}`;
+                console.error("Request failed:", error);
+
+                if (error.name === "AbortError") {
+                    return "Request timed out. Please try again.";
+                }
+
+                return `Connection error: ${error.message}`;
+
+            } finally {
+                clearTimeout(timeout);
             }
         }
+        // --- AKHIR DARI KODE BARU ANDA ---
 
         async function sendMessage() {
             const input = document.getElementById('chatInput');
@@ -425,7 +469,7 @@
             
             const translation = await callGeminiAPI(prompt, "You are a professional translator.");
             
-            if(!translation.startsWith("Error")) {
+            if(!translation.startsWith("API Error") && !translation.startsWith("Connection error")) {
                 transBox.innerText = translation;
                 transBox.classList.remove('hidden');
                 btnSpan.innerText = "Hide Translation";
@@ -548,12 +592,15 @@
                 if (!navigator.onLine || !apiKey) return;
                 
                 try {
-                    // UPDATED MODEL: gemini-3.8-flash (Free Tier Supported)
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+                    // Diperbarui agar cocok dengan sistem Header baru Anda
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent`;
                     const response = await fetch(url, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "x-goog-api-key": apiKey 
+                        },
+                        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: "ping" }] }] })
                     });
                     
                     if (response.ok) {
@@ -561,7 +608,7 @@
                     } else {
                         const err = await response.json();
                         console.error("API Error:", err);
-                        pingIcon.innerHTML = `<div class="flex flex-col items-end"><i class="fas fa-times-circle text-red-400 mb-1"></i> <span class="text-[10px] md:text-xs text-red-300 leading-tight">${err.error.status || 'Failed'}</span></div>`;
+                        pingIcon.innerHTML = `<div class="flex flex-col items-end"><i class="fas fa-times-circle text-red-400 mb-1"></i> <span class="text-[10px] md:text-xs text-red-300 leading-tight">${err.error.message || 'Failed'}</span></div>`;
                     }
                 } catch (e) {
                     pingIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
