@@ -6,753 +6,618 @@
     <title>ELSHA - English AI Tutor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
-            color: #ffffff;
-            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            margin: 0;
             overflow-x: hidden;
         }
-        
         .glass {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
         }
-
-        .chat-bubble-user {
-            background: rgba(79, 70, 229, 0.85);
-            border-bottom-right-radius: 0;
-        }
-
         .chat-bubble-ai {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-bottom-left-radius: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1rem 1rem 1rem 0.2rem;
         }
-
-        .hide { display: none !important; }
-        
+        .chat-bubble-user {
+            background: rgba(99, 102, 241, 0.8);
+            border-radius: 1rem 1rem 0.2rem 1rem;
+        }
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
-        
-        @keyframes pulse-mic {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        .recording { animation: pulse-mic 1.5s infinite; background-color: #ef4444 !important; color: white !important; }
     </style>
 </head>
-<body class="antialiased flex items-center justify-center p-0 md:p-4 h-screen w-screen relative">
+<body class="h-screen w-screen flex items-center justify-center p-0 md:p-4">
 
-    <!-- Mobile Hamburger Button -->
-    <button id="menuToggleBtn" onclick="window.toggleMenu()" class="md:hidden fixed top-4 left-4 z-50 p-2 glass rounded-lg text-white shadow-lg transition-all">
-        <i id="menuIcon" class="fas fa-bars text-xl w-6 text-center"></i>
-    </button>
-
-    <!-- Welcome Screen -->
-    <div id="welcomeScreen" class="glass rounded-3xl p-8 max-w-md w-full mx-4 text-center transition-all duration-500 z-10 relative">
-        <div class="mb-6 flex justify-center">
-            <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-5xl shadow-lg border border-white/30 backdrop-blur-md">
-                👩‍🏫
+    <!-- SETUP SCREEN -->
+    <div id="setupScreen" class="absolute inset-0 z-50 flex items-center justify-center glass flex-col p-6 transition-all duration-500">
+        <div class="max-w-md w-full text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3">
+                    <i class="fas fa-language text-4xl text-white"></i>
+                </div>
             </div>
-        </div>
-        <h1 class="text-4xl font-bold mb-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-200">ELSHA</h1>
-        <p class="text-white/80 mb-8 text-sm font-medium">Your Personal English AI Tutor</p>
-        
-        <div class="space-y-4">
-            <div class="relative">
-                <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" 
-                       class="w-full bg-black/20 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all mb-4 shadow-inner">
-                <input type="password" id="apiKeyInput" placeholder="Enter Gemini API Key" 
-                       class="w-full bg-black/20 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all shadow-inner">
-                <p class="text-xs text-white/60 mt-2 text-left px-1"><i class="fas fa-lock mr-1"></i> Saved locally in your browser.</p>
-            </div>
-            <button onclick="window.startApp()" class="w-full bg-gradient-to-r from-indigo-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02]">
+            <h1 class="text-4xl font-bold mb-2 tracking-wide">ELSHA</h1>
+            <p class="text-white/80 mb-8 font-light">Your Modern English AI Tutor</p>
+            
+            <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4 transition">
+            <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key here (AIzaSy...)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-6 transition">
+            
+            <button onclick="startApp()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition duration-300 transform hover:scale-105">
                 Start Learning <i class="fas fa-arrow-right ml-2"></i>
             </button>
+            <p class="text-xs text-white/50 mt-4">*Your API Key is stored safely in your browser.</p>
         </div>
     </div>
 
-    <!-- Main App Container -->
-    <div id="mainApp" class="hide glass md:rounded-3xl w-full h-full md:max-w-5xl md:h-[90vh] flex flex-col md:flex-row overflow-hidden shadow-2xl relative">
+    <!-- MAIN APP APP -->
+    <div id="mainApp" class="hidden w-full h-full max-w-6xl md:h-[90vh] glass md:rounded-3xl shadow-2xl flex relative overflow-hidden">
         
-        <!-- Sidebar Navigation -->
-        <div id="sidebar" class="w-72 h-full bg-black/20 backdrop-blur-xl border-r border-white/10 flex flex-col justify-between p-4 absolute md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 pt-16 md:pt-4">
-            <div>
-                <div class="flex items-center gap-3 mb-8 px-2">
-                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-pink-400 rounded-full flex items-center justify-center font-bold text-xl shadow-lg border border-white/20">E</div>
-                    <div>
-                        <h2 class="font-bold text-xl leading-tight tracking-wide">ELSHA</h2>
-                        <p class="text-xs text-pink-200 font-medium" id="greetingName">Hi, User!</p>
-                    </div>
-                </div>
+        <!-- Hamburger Button (Mobile) -->
+        <button id="menuToggleBtn" onclick="toggleMenu()" class="md:hidden absolute top-4 left-4 z-50 p-2 glass rounded-lg text-white shadow-lg transition">
+            <i class="fas fa-bars text-xl w-6 h-6 flex items-center justify-center"></i>
+        </button>
 
-                <nav class="space-y-2">
-                    <button onclick="window.switchTab('chat')" id="nav-chat" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-white/20 font-semibold transition-all text-left shadow-sm">
-                        <i class="fas fa-comments w-6 text-center text-pink-300"></i> Free Chat
-                    </button>
-                    <button onclick="window.switchTab('roleplay')" id="nav-roleplay" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl hover:bg-white/10 text-white/80 font-medium transition-all text-left">
-                        <i class="fas fa-theater-masks w-6 text-center text-indigo-300"></i> Roleplay
-                    </button>
-                    <button onclick="window.switchTab('translator')" id="nav-translator" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl hover:bg-white/10 text-white/80 font-medium transition-all text-left">
-                        <i class="fas fa-language w-6 text-center text-green-300"></i> Translation
-                    </button>
-                    <button onclick="window.switchTab('game')" id="nav-game" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl hover:bg-white/10 text-white/80 font-medium transition-all text-left">
-                        <i class="fas fa-gamepad w-6 text-center text-yellow-300"></i> Vocab Game
-                    </button>
-                </nav>
+        <!-- SIDEBAR -->
+        <div id="sidebar" class="w-64 h-full glass border-r border-white/20 p-6 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 absolute md:relative z-40">
+            <div class="flex items-center gap-4 mb-8 mt-12 md:mt-0">
+                <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-xl font-bold shadow-inner uppercase" id="userInitial">E</div>
+                <div>
+                    <h2 class="font-bold text-lg leading-tight">ELSHA</h2>
+                    <p class="text-xs text-white/70" id="userGreeting">Hi, User!</p>
+                </div>
             </div>
-            
-            <button onclick="window.logout()" class="flex items-center gap-3 px-4 py-3 text-red-300 hover:text-red-200 hover:bg-white/5 rounded-xl transition-all text-sm font-medium mt-4 md:mt-0">
-                <i class="fas fa-sign-out-alt w-6 text-center"></i> Exit & Clear Data
+
+            <nav class="flex-1 space-y-2">
+                <button onclick="switchTab('chat')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 bg-white/20">
+                    <i class="fas fa-comments w-5"></i> Free Chat
+                </button>
+                <button onclick="switchTab('roleplay')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3">
+                    <i class="fas fa-user-friends w-5"></i> Roleplay
+                </button>
+                <button onclick="switchTab('game')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3">
+                    <i class="fas fa-gamepad w-5"></i> Vocab Game
+                </button>
+                <button onclick="switchTab('status')" class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-yellow-300">
+                    <i class="fas fa-wifi w-5"></i> System Status
+                </button>
+            </nav>
+
+            <button onclick="logout()" class="mt-auto w-full text-left px-4 py-3 rounded-xl hover:bg-red-500/50 transition flex items-center gap-3 text-red-300">
+                <i class="fas fa-sign-out-alt w-5"></i> Exit
             </button>
         </div>
 
-        <!-- Content Area -->
-        <div class="flex-1 flex flex-col relative h-full w-full">
+        <!-- CONTENT AREA -->
+        <div class="flex-1 h-full flex flex-col relative">
             
-            <!-- Custom Toast Notification -->
-            <div id="toast" class="fixed top-4 right-4 md:absolute z-50 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-xl shadow-2xl border border-white/20 transform transition-all duration-300 translate-y-[-150%] opacity-0 flex items-center gap-3 font-medium text-sm">
-                <i class="fas fa-info-circle text-indigo-400"></i> <span id="toastMsg">Notification</span>
-            </div>
-
-            <!-- Free Chat View -->
-            <div id="view-chat" class="view-section flex flex-col h-full absolute inset-0">
-                <div class="p-4 md:p-5 border-b border-white/10 bg-black/10 flex justify-between items-center z-10 backdrop-blur-md pt-16 md:pt-5">
-                    <h3 class="font-semibold text-lg flex items-center gap-2"><i class="fas fa-robot text-pink-300"></i> English Conversation</h3>
-                    <button onclick="window.toggleTTS()" id="ttsToggle" class="text-white bg-white/10 p-2.5 rounded-lg hover:bg-white/20 transition-all shadow-sm" title="Toggle AI Voice">
-                        <i class="fas fa-volume-up w-5 text-center"></i>
-                    </button>
+            <!-- 1. FREE CHAT TAB -->
+            <div id="tab-chat" class="tab-content h-full flex flex-col">
+                <div class="p-5 border-b border-white/10 flex justify-between items-center bg-black/10 pl-16 md:pl-5">
+                    <h3 class="font-semibold text-lg"><i class="fas fa-comments mr-2"></i> Free Chat</h3>
                 </div>
-                
-                <div id="chatBox" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 pb-24">
-                    <!-- Messages render here -->
+                <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Chats will appear here -->
                 </div>
-
-                <div class="p-3 md:p-4 bg-black/30 border-t border-white/10 absolute bottom-0 w-full flex items-end gap-2 backdrop-blur-xl">
-                    <button id="micBtn" onclick="window.toggleMic('chat')" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all shrink-0 text-white">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <textarea id="chatInput" rows="1" placeholder="Type or speak in English or Indonesian..." 
-                        class="flex-1 bg-black/40 border border-white/20 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/50 focus:outline-none focus:border-pink-400 resize-none overflow-hidden h-[44px] shadow-inner"
-                        oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
-                    <button onclick="window.sendChatMessage()" class="w-11 h-11 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 flex items-center justify-center transition-all shrink-0 shadow-lg text-white">
-                        <i class="fas fa-paper-plane text-sm ml-1"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Roleplay View -->
-            <div id="view-roleplay" class="view-section hide flex flex-col h-full absolute inset-0 bg-black/5 pt-16 md:pt-0">
-                <div id="roleplaySelector" class="p-6 h-full overflow-y-auto">
-                    <h3 class="font-bold text-3xl mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Roleplay Scenarios</h3>
-                    <p class="text-white/70 mb-8 text-sm">Immerse yourself in real-life English situations.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <button onclick="window.startRoleplay('restaurant')" class="glass p-6 rounded-2xl hover:bg-white/10 transition-all text-left flex flex-col gap-4 group border-l-4 border-l-orange-400">
-                            <div class="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform"><i class="fas fa-utensils text-2xl"></i></div>
-                            <div>
-                                <h4 class="font-bold text-lg mb-1">Restaurant Menu</h4>
-                                <p class="text-sm text-white/60 leading-relaxed">Practice ordering your favorite food. Try ordering Ramen or Bakso!</p>
-                            </div>
+                <div class="p-4 bg-black/10 backdrop-blur-md">
+                    <div class="flex gap-2 relative">
+                        <button onclick="startVoiceRecognition('chat')" class="p-3 glass rounded-xl hover:bg-white/20 transition group">
+                            <i class="fas fa-microphone text-white group-hover:text-red-400"></i>
                         </button>
-                        <button onclick="window.startRoleplay('mountain')" class="glass p-6 rounded-2xl hover:bg-white/10 transition-all text-left flex flex-col gap-4 group border-l-4 border-l-green-400">
-                            <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform"><i class="fas fa-mountain text-2xl"></i></div>
-                            <div>
-                                <h4 class="font-bold text-lg mb-1">Mountain Cycling</h4>
-                                <p class="text-sm text-white/60 leading-relaxed">Ask locals for directions while exploring mountain trails and rivers.</p>
-                            </div>
+                        <input type="text" id="chatInput" placeholder="Type or speak in English/Indonesian..." class="flex-1 bg-black/20 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <button onclick="sendMessage()" class="p-3 bg-indigo-500 hover:bg-indigo-600 rounded-xl transition shadow-lg">
+                            <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- 2. ROLEPLAY TAB -->
+            <div id="tab-roleplay" class="tab-content hidden h-full flex flex-col overflow-y-auto p-6 pl-16 md:pl-6">
+                <h2 class="text-3xl font-bold mb-2"><i class="fas fa-theater-masks mr-2"></i> Roleplay</h2>
+                <p class="text-white/80 mb-6">Choose a scenario to practice real-life English.</p>
                 
-                <div id="roleplayActive" class="hide flex flex-col h-full absolute inset-0">
-                    <div class="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center z-10 backdrop-blur-md pt-16 md:pt-4">
-                        <div class="flex items-center gap-3">
-                            <button onclick="window.exitRoleplay()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"><i class="fas fa-arrow-left"></i></button>
-                            <h3 class="font-semibold text-lg" id="roleplayTitle">Scenario</h3>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div onclick="startRoleplay('You are a friendly local in a mountain village. I am a cyclist riding my bike enjoying the trees and river. I stop to ask you for directions and chat.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-green-400">
+                        <i class="fas fa-mountain text-3xl text-green-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Mountain Cyclist</h3>
+                        <p class="text-sm text-white/70">Ask locals for directions while enjoying the trees and rivers on your bike ride.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are a waiter at a restaurant. I am a customer ordering a bowl of bakso with yellow noodles, and maybe some homemade style ramen with a half-cut soft boiled egg.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-orange-400">
+                        <i class="fas fa-utensils text-3xl text-orange-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Ordering Food</h3>
+                        <p class="text-sm text-white/70">Practice ordering specific meals like ramen or bakso with yellow noodles.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are a client who needs a logo for your courier and logistics business. I am a graphic designer discussing the visual concepts with you.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-blue-400">
+                        <i class="fas fa-pencil-ruler text-3xl text-blue-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Design Client</h3>
+                        <p class="text-sm text-white/70">Discuss visual concepts and graphic design projects with a client.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are an expert mechanic. I am asking you for technical advice on why a motorcycle piston ring wears out and why a bicycle chain slips off the rear derailleur pulley.')" class="glass p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-gray-400">
+                        <i class="fas fa-cogs text-3xl text-gray-400 mb-3"></i>
+                        <h3 class="font-bold text-lg">Mechanic Shop</h3>
+                        <p class="text-sm text-white/70">Discuss technical vehicle repairs and mechanical parts.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. VOCAB GAME TAB -->
+            <div id="tab-game" class="tab-content hidden h-full flex flex-col items-center justify-center p-6 text-center pl-16 md:pl-6">
+                <div class="glass p-8 rounded-3xl max-w-md w-full relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-white/20"><div id="lvlProgress" class="h-full bg-yellow-400 w-0 transition-all"></div></div>
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="text-sm font-bold bg-white/20 px-3 py-1 rounded-full" id="levelDisplay">Level 1</div>
+                        <div class="text-sm font-bold bg-yellow-400/80 text-black px-3 py-1 rounded-full shadow-lg"><i class="fas fa-star text-xs"></i> Score: <span id="scoreDisplay">0</span></div>
                     </div>
                     
-                    <div id="roleplayBox" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 pb-24"></div>
-
-                    <div class="p-3 md:p-4 bg-black/30 border-t border-white/10 absolute bottom-0 w-full flex items-end gap-2 backdrop-blur-xl">
-                        <button id="rpMicBtn" onclick="window.toggleMic('roleplay')" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all shrink-0"><i class="fas fa-microphone"></i></button>
-                        <textarea id="rpInput" rows="1" placeholder="Continue the roleplay..." class="flex-1 bg-black/40 border border-white/20 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/50 focus:outline-none focus:border-indigo-400 resize-none h-[44px]" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
-                        <button onclick="window.sendRoleplayMessage()" class="w-11 h-11 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center transition-all shrink-0"><i class="fas fa-paper-plane text-sm ml-1"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Translator View -->
-            <div id="view-translator" class="view-section hide flex flex-col h-full absolute inset-0 p-6 pt-16 md:pt-6 overflow-y-auto bg-black/5">
-                <h3 class="font-bold text-2xl mb-6 text-white flex items-center gap-2"><i class="fas fa-language text-green-300"></i> Smart Translator</h3>
-                
-                <div class="flex-1 flex flex-col gap-4 max-w-2xl mx-auto w-full">
-                    <div class="flex items-center justify-center gap-4 glass p-3 rounded-2xl">
-                        <span id="transSourceLabel" class="font-semibold text-pink-300 w-24 text-right">Indonesian</span>
-                        <button onclick="window.swapLanguages()" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full transition-all flex items-center justify-center"><i class="fas fa-exchange-alt"></i></button>
-                        <span id="transTargetLabel" class="font-semibold text-indigo-300 w-24 text-left">English</span>
-                    </div>
-
-                    <div class="relative min-h-[160px]">
-                        <textarea id="transInput" placeholder="Enter text to translate..." 
-                            class="w-full h-full bg-black/30 border border-white/20 rounded-2xl p-5 text-lg text-white placeholder-white/40 focus:outline-none focus:border-green-400 resize-none shadow-inner"></textarea>
-                        <button id="transMicBtn" onclick="window.toggleMic('trans')" class="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-green-500/80 hover:bg-green-500 flex items-center justify-center transition-all shadow-lg text-white">
-                            <i class="fas fa-microphone"></i>
-                        </button>
-                    </div>
-
-                    <button onclick="window.translateText()" class="w-full bg-green-500 hover:bg-green-600 py-3.5 rounded-xl font-bold shadow-lg transition-all text-lg tracking-wide">
-                        Translate Now
+                    <h2 class="text-xl mb-2 text-white/80">Translate this word:</h2>
+                    <h1 id="wordToGuess" class="text-4xl font-bold text-white mb-8 tracking-wider">...</h1>
+                    
+                    <input type="text" id="gameInput" placeholder="Type meaning in Indonesian..." class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-center text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4" onkeypress="if(event.key === 'Enter') checkWord()">
+                    
+                    <button onclick="checkWord()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition shadow-lg">
+                        Submit Answer
                     </button>
-
-                    <div class="relative min-h-[160px] mt-2">
-                        <textarea id="transOutput" readonly placeholder="Translation will appear here..." 
-                            class="w-full h-full bg-white/10 border border-white/10 rounded-2xl p-5 text-lg text-white placeholder-white/30 resize-none focus:outline-none shadow-sm"></textarea>
-                    </div>
+                    <p id="gameFeedback" class="mt-4 text-sm font-semibold h-5"></p>
                 </div>
             </div>
 
-            <!-- Game View -->
-            <div id="view-game" class="view-section hide flex flex-col h-full absolute inset-0 p-6 pt-16 md:pt-6 items-center justify-center bg-black/5">
-                <div class="text-center w-full max-w-lg">
-                    <h3 class="font-bold text-3xl mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">Vocab Master</h3>
-                    <p class="text-white/70 text-sm mb-8">Translate the word correctly to score points!</p>
-
-                    <div class="glass border border-white/20 rounded-3xl p-8 mb-6 shadow-2xl relative overflow-hidden">
-                        <div class="absolute top-4 right-5 font-bold text-yellow-300 bg-black/40 px-3 py-1 rounded-full text-sm border border-yellow-500/30">Score: <span id="gameScore">0</span></div>
-                        
-                        <p class="text-xs text-white/50 mb-2 uppercase tracking-widest font-bold bg-white/10 inline-block px-3 py-1 rounded-full" id="gameDirection">IND ➔ ENG</p>
-                        <h2 class="text-5xl font-bold mb-8 mt-4 tracking-wide text-white drop-shadow-md" id="gameWord">Word</h2>
-                        
-                        <form onsubmit="event.preventDefault(); window.checkGameAnswer();" class="flex gap-2">
-                            <input type="text" id="gameInput" autocomplete="off" placeholder="Your answer..." 
-                                class="flex-1 bg-black/40 border border-white/30 rounded-xl px-5 py-4 text-lg text-white placeholder-white/50 focus:outline-none focus:border-yellow-400 shadow-inner">
-                            <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-yellow-950 px-8 py-4 rounded-xl font-bold shadow-lg transition-all text-lg">
-                                Check
-                            </button>
-                        </form>
-                        <div class="h-8 mt-4 flex items-center justify-center">
-                            <p id="gameFeedback" class="text-sm font-bold transition-all opacity-0 transform scale-95"></p>
+            <!-- 4. SYSTEM STATUS TAB -->
+            <div id="tab-status" class="tab-content hidden h-full flex flex-col p-6 pl-16 md:pl-6 overflow-y-auto">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-stethoscope mr-2"></i> System Diagnostics</h2>
+                
+                <div class="space-y-4 max-w-2xl">
+                    <div class="glass p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-lg"><i class="fas fa-wifi mr-2"></i> Internet Connection</h3>
+                            <p class="text-sm text-white/70">Checking network status...</p>
                         </div>
+                        <div id="statusNetwork" class="text-2xl"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
-                    <button onclick="window.initGame()" class="text-sm text-white/60 hover:text-white underline font-medium px-4 py-2">Skip this word</button>
+
+                    <div class="glass p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-lg"><i class="fas fa-key mr-2"></i> API Key Setup</h3>
+                            <p class="text-sm text-white/70">Checking if API key is stored locally...</p>
+                        </div>
+                        <div id="statusKey" class="text-2xl"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
+
+                    <div class="glass p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-lg"><i class="fas fa-server mr-2"></i> Gemini Server Ping</h3>
+                            <p class="text-sm text-white/70">Testing connection to Google AI Studio...</p>
+                        </div>
+                        <div id="statusPing" class="text-2xl"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Loading Overlay -->
-            <div id="loadingOverlay" class="hide absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-r-3xl">
-                <div class="w-14 h-14 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mb-4 shadow-lg"></div>
-                <p class="text-sm font-semibold animate-pulse tracking-wide text-white" id="loadingText">ELSHA is typing...</p>
+                <button onclick="runDiagnostics()" class="mt-8 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition w-max">
+                    <i class="fas fa-sync-alt mr-2"></i> Refresh Status
+                </button>
             </div>
-
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Setup Placeholder strictly following rules
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'elsha-default-app';
-        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-        let db, auth, userId = null;
+    <script>
+        // --- GLOBAL VARIABLES ---
+        let userName = "";
+        let apiKey = "";
+        let chatHistory = [];
+        let synth = window.speechSynthesis;
+        let femaleVoice = null;
         
-        // App State
-        const state = {
-            userName: localStorage.getItem('elsha_user_name') || '',
-            apiKey: localStorage.getItem('elsha_api_key') || '',
-            ttsEnabled: true,
-            isRecording: false,
-            activeMicContext: null,
-            recognition: null,
-            chatHistory: [],
-            rpHistory: [],
-            currentRpId: null,
-            transDirection: 'id-en',
-            score: 0,
-            currentWord: null
-        };
-
-        const roleplayScenarios = {
-            restaurant: {
-                title: "Restaurant Menu",
-                sysPrompt: "You are a polite waiter at an Indonesian-fusion restaurant. The user wants to order food. Your task is to help them order 'Ramen' or 'Bakso' using natural English. Do not list the items immediately, ask them what they feel like eating. Correct minor grammar mistakes in a friendly (Tip: ...) format at the end.",
-                initial: "Welcome to our restaurant! Please have a seat. What kind of food are you in the mood for today?"
-            },
-            mountain: {
-                title: "Mountain Cycling",
-                sysPrompt: "You are a friendly local resident in a beautiful mountain village. The user is cycling and stops to ask for directions or talk about the scenery (trees, rivers). Keep the conversation natural, helpful, and outdoorsy. Correct minor English mistakes gently using (Tip: ...) at the end.",
-                initial: "Hello there! Beautiful day for a bike ride, isn't it? Are you enjoying the mountain trails?"
-            }
-        };
-
-        const vocabList = [
-            { id: "buku", en: "book" }, { id: "sepeda", en: "bicycle" }, { id: "gunung", en: "mountain" },
-            { id: "makanan", en: "food" }, { id: "jalan", en: "road" }, { id: "sungai", en: "river" },
-            { id: "pohon", en: "tree" }, { id: "teman", en: "friend" }, { id: "air", en: "water" },
-            { id: "belajar", en: "learn" }, { id: "berbicara", en: "speak" }, { id: "mendengarkan", en: "listen" }
+        // Vocab Game Variables
+        let currentScore = 0;
+        let currentLevel = 1;
+        let currentWordIndex = -1;
+        let usedIndices = [];
+        
+        // Level 1: Basic words (Everyday items, cycling, food)
+        const vocabLevel1 = [
+            { en: "Bicycle", id: "sepeda" }, { en: "Mountain", id: "gunung" }, { en: "Tree", id: "pohon" },
+            { en: "River", id: "sungai" }, { en: "Noodle", id: "mie" }, { en: "Egg", id: "telur" },
+            { en: "Bowl", id: "mangkuk" }, { en: "Draw", id: "menggambar" }, { en: "Paper", id: "kertas" },
+            { en: "Speak", id: "berbicara" }, { en: "Listen", id: "mendengar" }, { en: "Water", id: "air" }
         ];
 
-        async function initFirebase() {
-            if(!firebaseConfigStr) return false;
-            try {
-                const firebaseConfig = JSON.parse(firebaseConfigStr);
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Rule 3: Auth Before Queries
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                userId = auth.currentUser?.uid;
-                return true;
-            } catch (e) {
-                console.error("Firebase init error", e);
-                return false;
-            }
-        }
+        // Level 2: Harder words (Mechanics, Design, Law, Stocks)
+        const vocabLevel2 = [
+            { en: "Piston", id: "piston" }, { en: "Pulley", id: "katrol" }, { en: "Derailleur", id: "pemindah gigi" },
+            { en: "Graphic", id: "grafis" }, { en: "Logistics", id: "logistik" }, { en: "Capital", id: "modal" },
+            { en: "Dividend", id: "dividen" }, { en: "Indemnity", id: "ganti rugi" }, { en: "Breach", id: "pelanggaran" },
+            { en: "Contract", id: "kontrak" }, { en: "Symptom", id: "gejala" }, { en: "Wear out", id: "aus" }
+        ];
 
-        window.onload = async () => {
-            // Pre-fill inputs
-            if (state.userName) document.getElementById('userNameInput').value = state.userName;
-            if (state.apiKey) document.getElementById('apiKeyInput').value = state.apiKey;
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            const storedName = localStorage.getItem('elsha_username');
+            const storedKey = localStorage.getItem('elsha_apiKey');
             
-            setupSpeechRecognition();
+            if (storedName && storedKey) {
+                userName = storedName;
+                apiKey = storedKey;
+                showMainApp();
+            }
             
-            // Handle Enter key for chat
-            document.getElementById('chatInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendChatMessage(); }
-            });
-            document.getElementById('rpInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendRoleplayMessage(); }
-            });
-            
-            // Async load voices
-            window.speechSynthesis.onvoiceschanged = () => { /* triggers voice loading */ };
+            // Load Voices
+            synth.onvoiceschanged = () => {
+                const voices = synth.getVoices();
+                // Prefer high quality female voices
+                femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Zira') || v.name.includes('Samantha') || (v.name.includes('Female') && v.lang.startsWith('en'))) || voices.find(v => v.lang.startsWith('en'));
+            };
         };
 
-        window.startApp = async () => {
+        function startApp() {
             const name = document.getElementById('userNameInput').value.trim();
             const key = document.getElementById('apiKeyInput').value.trim();
             
-            if(!name || !key) {
-                showToast("Please enter both Name and API Key.");
+            if (!name || !key) {
+                alert("Please enter both your name and API Key!");
                 return;
             }
 
-            state.userName = name;
-            state.apiKey = key;
-            localStorage.setItem('elsha_user_name', name);
-            localStorage.setItem('elsha_api_key', key);
-            
-            document.getElementById('greetingName').innerText = `Hi, ${name}!`;
-            document.getElementById('welcomeScreen').classList.add('hide');
-            document.getElementById('mainApp').classList.remove('hide');
-            
-            showLoading(true, "Connecting...");
-            await initFirebase();
-            await loadUserData();
-            showLoading(false);
-            
-            window.initGame();
-        };
-
-        async function loadUserData() {
-            if(!userId || !db) {
-                // No firebase, initialize local chat
-                startLocalChat();
-                return;
+            if (!key.startsWith("AIzaSy")) {
+                alert("Warning: Valid Gemini API keys usually start with 'AIzaSy'. Please check your key.");
             }
+
+            userName = name;
+            apiKey = key;
+            localStorage.setItem('elsha_username', userName);
+            localStorage.setItem('elsha_apiKey', apiKey);
             
-            // Rule 1: Strict Paths
-            const chatRef = doc(db, 'artifacts', appId, 'users', userId, 'elsha_data', 'chat');
-            try {
-                const snap = await getDoc(chatRef);
-                if (snap.exists() && snap.data().history && snap.data().history.length > 0) {
-                    state.chatHistory = snap.data().history;
-                    state.chatHistory.forEach(m => renderChatBubble(m.role, m.text, 'chatBox'));
-                    
-                    // Welcome back message, not saved to history to avoid repetition
-                    setTimeout(() => {
-                        renderChatBubble('ai', `Welcome back, ${state.userName}! Ready to continue?`, 'chatBox');
-                        window.speak(`Welcome back, ${state.userName}! Ready to continue?`);
-                    }, 500);
-                } else {
-                    startLocalChat();
-                }
-            } catch (e) {
-                console.error(e);
-                startLocalChat();
+            showMainApp();
+        }
+
+        function showMainApp() {
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userGreeting').innerText = `Hi, ${userName}!`;
+            document.getElementById('userInitial').innerText = userName.charAt(0).toUpperCase();
+            
+            if(chatHistory.length === 0) {
+                addMessage(`Hello ${userName}! I am ELSHA, your English AI tutor. Let's practice!`, 'ai');
             }
         }
 
-        async function saveChatHistory() {
-            if(!userId || !db) return;
-            const chatRef = doc(db, 'artifacts', appId, 'users', userId, 'elsha_data', 'chat');
-            try {
-                // Keeping history limited to last 20 messages to save space
-                const limitedHistory = state.chatHistory.slice(-20);
-                await setDoc(chatRef, { history: limitedHistory }, { merge: true });
-            } catch (e) {
-                console.error("Save failed", e);
-            }
-        }
-
-        function startLocalChat() {
-            state.chatHistory = [];
-            const msg = `Hello ${state.userName}! I am ELSHA, your English AI tutor. How can I help you practice your English today?`;
-            appendMessage('ai', msg, 'chatBox', state.chatHistory);
-            window.speak(msg);
-        }
-
-        window.toggleMenu = () => {
-            const sidebar = document.getElementById('sidebar');
-            const icon = document.getElementById('menuIcon');
-            sidebar.classList.toggle('-translate-x-full');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                icon.className = 'fas fa-bars text-xl w-6 text-center';
-            } else {
-                icon.className = 'fas fa-times text-xl w-6 text-center';
-            }
-        };
-
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
-            document.getElementById(`view-${tabId}`).classList.remove('hide');
-            
-            document.querySelectorAll('.nav-btn').forEach(el => {
-                el.classList.remove('bg-white/20');
-                el.classList.add('hover:bg-white/10', 'text-white/80');
-            });
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            activeNav.classList.add('bg-white/20');
-            activeNav.classList.remove('hover:bg-white/10', 'text-white/80');
-            
-            // Auto close menu on mobile
-            if(window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if(!sidebar.classList.contains('-translate-x-full')) window.toggleMenu();
-            }
-        };
-
-        window.logout = () => {
-            localStorage.removeItem('elsha_api_key');
-            localStorage.removeItem('elsha_user_name');
+        function logout() {
+            localStorage.removeItem('elsha_apiKey');
             location.reload();
-        };
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            toast.classList.remove('translate-y-[-150%]', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-[-150%]', 'opacity-0'), 3000);
         }
 
-        function showLoading(show, text = "ELSHA is thinking...") {
-            const overlay = document.getElementById('loadingOverlay');
-            document.getElementById('loadingText').innerText = text;
-            if(show) overlay.classList.remove('hide');
-            else overlay.classList.add('hide');
-        }
-
-        async function callGemini(promptText, systemText) {
-            if (!state.apiKey) {
-                showToast("API Key is missing.");
-                return null;
+        // --- MOBILE MENU ---
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const icon = document.querySelector('#menuToggleBtn i');
+            sidebar.classList.toggle('-translate-x-full');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                icon.className = 'fas fa-bars text-xl w-6 h-6 flex items-center justify-center';
+            } else {
+                icon.className = 'fas fa-times text-xl w-6 h-6 flex items-center justify-center';
             }
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${state.apiKey}`;
+        }
+
+        // --- TAB NAVIGATION ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-white/20'));
+            event.currentTarget.classList.add('bg-white/20');
+
+            if(window.innerWidth < 768) toggleMenu(); // Auto close menu on mobile
+            
+            if(tabId === 'game' && currentWordIndex === -1) nextWord();
+            if(tabId === 'status') runDiagnostics();
+        }
+
+        // --- CHAT LOGIC & API ---
+        async function callGeminiAPI(prompt, systemInstruction = "") {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             const payload = {
-                contents: [{ parts: [{ text: promptText }] }],
-                systemInstruction: { parts: [{ text: systemText }] }
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction || `You are ELSHA, a helpful English tutor. The user's name is ${userName}. Keep responses concise, friendly, and correct their grammar if needed.` }] }
             };
 
             try {
                 const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-                if(!response.ok) throw new Error("API Error");
+                
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error.message);
+                }
+                
                 const data = await response.json();
-                return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
-            } catch (e) {
-                console.error(e);
-                showToast("Connection failed. Check your API Key.");
-                return null;
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error(error);
+                return `Error: ${error.message}`;
             }
         }
 
-        window.sendChatMessage = async () => {
+        async function sendMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
-            if(!text) return;
-            
+            if (!text) return;
+
+            addMessage(text, 'user');
             input.value = '';
-            input.style.height = '44px';
             
-            appendMessage('user', text, 'chatBox', state.chatHistory);
-            showLoading(true);
+            const typingId = addTypingIndicator();
+            const response = await callGeminiAPI(text);
+            removeTypingIndicator(typingId);
+            
+            addMessage(response, 'ai');
+            speakText(response);
+        }
 
-            // Context limited to last 4 messages to save tokens
-            const ctx = state.chatHistory.slice(-4).map(m => `${m.role === 'user' ? state.userName : 'ELSHA'}: ${m.text}`).join('\n');
-            const prompt = `History:\n${ctx}\n\n${state.userName}: ${text}`;
-            const sys = `You are ELSHA, a friendly English AI tutor. The user's name is ${state.userName}. Keep answers conversational (1-2 short paragraphs). Translate to English if they speak Indonesian and teach them politely. Avoid heavy use of emojis.`;
+        function addMessage(text, sender) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            const isAI = sender === 'ai';
+            
+            div.className = `flex ${isAI ? 'justify-start' : 'justify-end'} mb-4`;
+            
+            // Text formatting to remove markdown bolding for cleaner reading
+            const cleanText = text.replace(/\*\*/g, '');
+            const msgId = 'msg-' + Date.now();
 
-            const reply = await callGemini(prompt, sys);
-            showLoading(false);
+            let innerHTML = `<div class="max-w-[85%] md:max-w-[75%] p-4 ${isAI ? 'chat-bubble-ai text-white' : 'chat-bubble-user text-white'} shadow-md">
+                <p class="leading-relaxed" id="${msgId}">${cleanText}</p>`;
 
-            if(reply) {
-                appendMessage('ai', reply, 'chatBox', state.chatHistory);
-                window.speak(reply);
-                saveChatHistory();
+            // Add "See Translation" button for AI messages
+            if (isAI) {
+                innerHTML += `
+                <div class="mt-2 pt-2 border-t border-white/20 flex flex-col gap-2">
+                    <button onclick="translateInline('${msgId}')" class="text-xs font-semibold text-white/70 hover:text-white text-left flex items-center transition">
+                        <i class="fas fa-language mr-1"></i> <span id="btn-${msgId}">See Translation</span>
+                    </button>
+                    <p id="trans-${msgId}" class="text-sm text-yellow-200 hidden italic"></p>
+                </div>`;
             }
-        };
-
-        function appendMessage(role, text, boxId, historyArr) {
-            historyArr.push({role, text});
-            renderChatBubble(role, text, boxId);
+            
+            innerHTML += `</div>`;
+            div.innerHTML = innerHTML;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function renderChatBubble(role, text, boxId) {
-            const box = document.getElementById(boxId);
-            const wrap = document.createElement('div');
-            wrap.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'}`;
-            
-            const bub = document.createElement('div');
-            bub.className = `max-w-[85%] md:max-w-[75%] rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-md ${role === 'user' ? 'chat-bubble-user text-white' : 'chat-bubble-ai text-white/90'}`;
-            
-            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-            bub.innerHTML = formatted;
-            
-            wrap.appendChild(bub);
-            box.appendChild(wrap);
-            box.scrollTop = box.scrollHeight;
-        }
+        // Inline Translation (Instagram style)
+        async function translateInline(msgId) {
+            const transBox = document.getElementById(`trans-${msgId}`);
+            const btnSpan = document.getElementById(`btn-${msgId}`);
+            const originalText = document.getElementById(msgId).innerText;
 
-        window.toggleTTS = () => {
-            state.ttsEnabled = !state.ttsEnabled;
-            const icon = document.querySelector('#ttsToggle i');
-            if(state.ttsEnabled) {
-                icon.className = 'fas fa-volume-up w-5 text-center';
-                document.getElementById('ttsToggle').classList.replace('text-white/40', 'text-white');
+            if (!transBox.classList.contains('hidden')) {
+                // Hide if already shown
+                transBox.classList.add('hidden');
+                btnSpan.innerText = "See Translation";
+                return;
+            }
+
+            if (transBox.innerText !== "") {
+                // Show cached translation
+                transBox.classList.remove('hidden');
+                btnSpan.innerText = "Hide Translation";
+                return;
+            }
+
+            // Fetch translation
+            btnSpan.innerText = "Translating...";
+            const prompt = `Translate the following English text to natural Indonesian language. Do not add any extra comments, just output the translation:\n\n"${originalText}"`;
+            
+            const translation = await callGeminiAPI(prompt, "You are a professional translator.");
+            
+            if(!translation.startsWith("Error")) {
+                transBox.innerText = translation;
+                transBox.classList.remove('hidden');
+                btnSpan.innerText = "Hide Translation";
             } else {
-                icon.className = 'fas fa-volume-mute w-5 text-center';
-                document.getElementById('ttsToggle').classList.replace('text-white', 'text-white/40');
-                window.speechSynthesis.cancel();
-            }
-        };
-
-        window.speak = (text) => {
-            if(!state.ttsEnabled || !window.speechSynthesis) return;
-            window.speechSynthesis.cancel(); 
-            
-            const cleanText = text.replace(/[\*#_]/g, ''); // Clean markdown
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            
-            const voices = window.speechSynthesis.getVoices();
-            let selected = null;
-            
-            // 1. Target specific high quality female voices
-            const targets = ['Google UK English Female', 'Google US English', 'Microsoft Zira', 'Samantha', 'Victoria', 'Karen'];
-            for(let t of targets) {
-                selected = voices.find(v => v.name.includes(t));
-                if(selected) break;
-            }
-            
-            // 2. Fallback to any english female voice
-            if(!selected) {
-                selected = voices.find(v => v.name.toLowerCase().includes('female') && v.lang.startsWith('en'));
-            }
-            
-            // 3. Fallback to any english voice
-            if(!selected) {
-                selected = voices.find(v => v.lang.startsWith('en'));
-            }
-
-            if(selected) utterance.voice = selected;
-            
-            // Make it sound natural and less stiff
-            utterance.rate = 0.95; 
-            utterance.pitch = 1.1; 
-            
-            window.speechSynthesis.speak(utterance);
-        };
-
-        function setupSpeechRecognition() {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if(SR) {
-                state.recognition = new SR();
-                state.recognition.continuous = false;
-                state.recognition.interimResults = false;
-                
-                state.recognition.onresult = (e) => {
-                    const res = e.results[0][0].transcript;
-                    if(state.activeMicContext === 'chat') {
-                        document.getElementById('chatInput').value = res;
-                        window.sendChatMessage();
-                    } else if(state.activeMicContext === 'trans') {
-                        document.getElementById('transInput').value = res;
-                    } else if(state.activeMicContext === 'roleplay') {
-                        document.getElementById('rpInput').value = res;
-                        window.sendRoleplayMessage();
-                    }
-                };
-                state.recognition.onend = stopMicUI;
-                state.recognition.onerror = (e) => {
-                    console.error(e); stopMicUI(); showToast("Mic error.");
-                };
+                btnSpan.innerText = "Translation Failed";
             }
         }
 
-        window.toggleMic = (context) => {
-            if(!state.recognition) { showToast("Mic not supported in this browser."); return; }
-            if(state.isRecording) { state.recognition.stop(); return; }
-            
-            state.activeMicContext = context;
-            state.recognition.lang = (context === 'trans' && state.transDirection === 'id-en') ? 'id-ID' : 'en-US';
-            
-            try {
-                state.recognition.start();
-                state.isRecording = true;
-                const btnIds = { 'chat': 'micBtn', 'trans': 'transMicBtn', 'roleplay': 'rpMicBtn' };
-                document.getElementById(btnIds[context]).classList.add('recording');
-            } catch(e) { console.error(e); }
-        };
-
-        function stopMicUI() {
-            state.isRecording = false;
-            ['micBtn', 'transMicBtn', 'rpMicBtn'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.classList.remove('recording');
-            });
+        function addTypingIndicator() {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            const id = 'typing-' + Date.now();
+            div.id = id;
+            div.className = `flex justify-start mb-4`;
+            div.innerHTML = `<div class="p-4 chat-bubble-ai text-white/70 shadow-md">
+                <i class="fas fa-circle-notch fa-spin"></i> ELSHA is typing...
+            </div>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return id;
         }
 
-        window.startRoleplay = (id) => {
-            state.currentRpId = id;
-            state.rpHistory = [];
-            document.getElementById('roleplayBox').innerHTML = '';
-            
-            const scene = roleplayScenarios[id];
-            document.getElementById('roleplayTitle').innerText = scene.title;
-            document.getElementById('roleplaySelector').classList.add('hide');
-            document.getElementById('roleplayActive').classList.remove('hide');
-            
-            appendMessage('ai', scene.initial, 'roleplayBox', state.rpHistory);
-            window.speak(scene.initial);
-        };
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if(el) el.remove();
+        }
 
-        window.exitRoleplay = () => {
-            document.getElementById('roleplayActive').classList.add('hide');
-            document.getElementById('roleplaySelector').classList.remove('hide');
-            state.currentRpId = null;
-            window.speechSynthesis.cancel();
-        };
-
-        window.sendRoleplayMessage = async () => {
-            const input = document.getElementById('rpInput');
-            const text = input.value.trim();
-            if(!text) return;
-            input.value = ''; input.style.height = '44px';
+        // --- ROLEPLAY LOGIC ---
+        function startRoleplay(scenarioPrompt) {
+            switchTab('chat');
+            document.getElementById('chatBox').innerHTML = ''; // Clear chat
+            addMessage("Roleplay started! Let's begin.", 'ai');
             
-            appendMessage('user', text, 'roleplayBox', state.rpHistory);
-            showLoading(true, "Roleplaying...");
+            // Set context by silently starting the conversation based on the prompt
+            setTimeout(async () => {
+                const typingId = addTypingIndicator();
+                const response = await callGeminiAPI("Hello, please start the roleplay based on your persona.", scenarioPrompt);
+                removeTypingIndicator(typingId);
+                addMessage(response, 'ai');
+                speakText(response);
+            }, 500);
+        }
 
-            const scene = roleplayScenarios[state.currentRpId];
-            const ctx = state.rpHistory.slice(-4).map(m => `${m.role === 'user' ? 'User' : 'You'}: ${m.text}`).join('\n');
-            const prompt = `History:\n${ctx}\n\nUser: ${text}`;
+        // --- VOCAB GAME LOGIC ---
+        function nextWord() {
+            const currentVocabList = currentLevel === 1 ? vocabLevel1 : vocabLevel2;
             
-            const reply = await callGemini(prompt, scene.sysPrompt);
-            showLoading(false);
-
-            if(reply) {
-                appendMessage('ai', reply, 'roleplayBox', state.rpHistory);
-                window.speak(reply);
+            // Reset used words if all have been played
+            if (usedIndices.length >= currentVocabList.length) {
+                usedIndices = [];
             }
-        };
 
-        window.swapLanguages = () => {
-            state.transDirection = state.transDirection === 'id-en' ? 'en-id' : 'id-en';
-            const sLab = document.getElementById('transSourceLabel');
-            const tLab = document.getElementById('transTargetLabel');
-            
-            if(state.transDirection === 'id-en') {
-                sLab.innerText = 'Indonesian'; sLab.className = 'font-semibold text-pink-300 w-24 text-right';
-                tLab.innerText = 'English'; tLab.className = 'font-semibold text-indigo-300 w-24 text-left';
-            } else {
-                sLab.innerText = 'English'; sLab.className = 'font-semibold text-indigo-300 w-24 text-right';
-                tLab.innerText = 'Indonesian'; tLab.className = 'font-semibold text-pink-300 w-24 text-left';
-            }
-            
-            const iEl = document.getElementById('transInput');
-            const oEl = document.getElementById('transOutput');
-            iEl.value = oEl.value;
-            oEl.value = '';
-        };
+            let rnd;
+            do {
+                rnd = Math.floor(Math.random() * currentVocabList.length);
+            } while (usedIndices.includes(rnd));
 
-        window.translateText = async () => {
-            const text = document.getElementById('transInput').value.trim();
-            if(!text) return;
-            showLoading(true, "Translating...");
-            const isIdToEn = state.transDirection === 'id-en';
-            const sys = `Translate the following text from ${isIdToEn ? 'Indonesian to English' : 'English to Indonesian'}. Provide ONLY the direct translation.`;
+            usedIndices.push(rnd);
+            currentWordIndex = rnd;
             
-            const res = await callGemini(text, sys);
-            showLoading(false);
-            if(res) document.getElementById('transOutput').value = res;
-        };
+            document.getElementById('wordToGuess').innerText = currentVocabList[currentWordIndex].en;
+            document.getElementById('gameInput').value = '';
+            document.getElementById('gameFeedback').innerText = '';
+        }
 
-        window.initGame = () => {
-            const randomWord = vocabList[Math.floor(Math.random() * vocabList.length)];
-            state.currentWord = randomWord;
-            // Only IND -> ENG as requested
-            document.getElementById('gameWord').innerText = randomWord.id;
-            
-            const inp = document.getElementById('gameInput');
-            inp.value = ''; 
-            
-            const fb = document.getElementById('gameFeedback');
-            fb.classList.replace('scale-100', 'scale-95');
-            fb.classList.replace('opacity-100', 'opacity-0');
-        };
-
-        window.checkGameAnswer = () => {
+        function checkWord() {
+            const currentVocabList = currentLevel === 1 ? vocabLevel1 : vocabLevel2;
             const input = document.getElementById('gameInput').value.trim().toLowerCase();
-            if(!input) return;
-            
-            const correct = state.currentWord.en.toLowerCase();
-            const fb = document.getElementById('gameFeedback');
-            fb.classList.replace('scale-95', 'scale-100');
-            fb.classList.replace('opacity-0', 'opacity-100');
-            
-            if(input === correct) {
-                state.score += 10;
-                document.getElementById('gameScore').innerText = state.score;
-                fb.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Correct! +10 Points';
-                fb.className = 'text-sm font-bold transition-all text-green-400 drop-shadow-md scale-100 opacity-100';
-                window.speak("Correct");
-                setTimeout(() => window.initGame(), 1500);
-            } else {
-                fb.innerHTML = `<i class="fas fa-times-circle mr-1"></i> Incorrect. The answer is "${correct}"`;
-                fb.className = 'text-sm font-bold transition-all text-red-400 drop-shadow-md scale-100 opacity-100';
-                window.speak(correct);
-                setTimeout(() => window.initGame(), 2500);
-            }
-        };
+            const correctWord = currentVocabList[currentWordIndex].id.toLowerCase();
+            const feedback = document.getElementById('gameFeedback');
 
+            if (input === correctWord) {
+                feedback.innerText = "Correct! +10 Points 🌟";
+                feedback.className = "mt-4 text-sm font-semibold h-5 text-green-300";
+                currentScore += 10;
+                document.getElementById('scoreDisplay').innerText = currentScore;
+                
+                // Level Up Logic
+                if (currentScore >= 100 && currentLevel === 1) {
+                    currentLevel = 2;
+                    usedIndices = []; // Reset for new level
+                    document.getElementById('levelDisplay').innerText = "Level 2";
+                    document.getElementById('levelDisplay').classList.replace("bg-white/20", "bg-red-500/80");
+                    alert("🎉 Congratulations! You reached 100 points and advanced to Level 2! Words will be harder now.");
+                }
+
+                // Update Progress Bar (Max 100 per level visually)
+                const progress = Math.min((currentScore % 100) || (currentScore === 100 ? 100 : 0), 100);
+                document.getElementById('lvlProgress').style.width = `${progress}%`;
+
+                setTimeout(nextWord, 1000);
+            } else {
+                feedback.innerText = `Wrong! The correct answer is "${currentVocabList[currentWordIndex].id}" ❌`;
+                feedback.className = "mt-4 text-sm font-semibold h-5 text-red-300";
+            }
+        }
+
+        // --- SYSTEM DIAGNOSTICS LOGIC ---
+        async function runDiagnostics() {
+            const netIcon = document.getElementById('statusNetwork');
+            const keyIcon = document.getElementById('statusKey');
+            const pingIcon = document.getElementById('statusPing');
+
+            // Reset UI
+            netIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+            keyIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+            pingIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+
+            // 1. Check Network
+            setTimeout(() => {
+                if (navigator.onLine) {
+                    netIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                } else {
+                    netIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                    pingIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-400"></i>';
+                    return; // Stop here if offline
+                }
+            }, 500);
+
+            // 2. Check API Key Locally
+            setTimeout(() => {
+                if (apiKey && apiKey.startsWith("AIzaSy")) {
+                    keyIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                } else {
+                    keyIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                }
+            }, 1000);
+
+            // 3. Ping Gemini API
+            setTimeout(async () => {
+                if (!navigator.onLine || !apiKey) return;
+                
+                try {
+                    // Send a tiny request just to verify auth
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
+                    });
+                    
+                    if (response.ok) {
+                        pingIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                    } else {
+                        const err = await response.json();
+                        console.error("API Error:", err);
+                        pingIcon.innerHTML = `<i class="fas fa-times-circle text-red-400"></i> <span class="text-xs text-red-300 block mt-1">${err.error.status || 'Failed'}</span>`;
+                    }
+                } catch (e) {
+                    pingIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                }
+            }, 1500);
+        }
+
+        // --- SPEECH RECOGNITION & TTS ---
+        function speakText(text) {
+            if (!synth) return;
+            const cleanText = text.replace(/[*#]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            if (femaleVoice) utterance.voice = femaleVoice;
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1; 
+            synth.speak(utterance);
+        }
+
+        function startVoiceRecognition(mode) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Your browser does not support Voice Recognition. Please use Chrome.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US'; 
+            recognition.start();
+            
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-microphone text-red-500 fa-beat"></i>';
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if(mode === 'chat') {
+                    document.getElementById('chatInput').value = transcript;
+                }
+                btn.innerHTML = originalHTML;
+            };
+
+            recognition.onerror = () => {
+                btn.innerHTML = originalHTML;
+            };
+            
+            recognition.onend = () => {
+                btn.innerHTML = originalHTML;
+            };
+        }
     </script>
 </body>
 </html>
