@@ -51,7 +51,7 @@
                 </div>
             </div>
             <h1 class="text-4xl font-bold mb-2 tracking-wide">ELSHA</h1>
-            <p class="text-white/80 mb-8 font-light">Your Modern English AI Tutor</p>
+            <p class="text-white/80 mb-8 font-light">Your Modern English AI Tutor (Pro Powered)</p>
             
             <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4 transition">
             <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key (AQ... or AIza...)" class="w-full bg-black/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-6 transition">
@@ -208,7 +208,7 @@
                     <div class="glass p-4 md:p-5 rounded-2xl flex items-center justify-between">
                         <div class="pr-2">
                             <h3 class="font-bold text-base md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
-                            <p class="text-xs md:text-sm text-white/70 mt-1">Testing connection to Gemini AI...</p>
+                            <p class="text-xs md:text-sm text-white/70 mt-1">Testing connection to Gemini AI (Pro)...</p>
                         </div>
                         <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
@@ -291,7 +291,7 @@
             document.getElementById('userInitial').innerText = userName.charAt(0).toUpperCase();
             
             if(chatHistory.length === 0) {
-                addMessage(`Hello ${userName}! I am ELSHA, your English AI tutor. Let's practice!`, 'ai');
+                addMessage(`Hello ${userName}! I am ELSHA, your English AI tutor powered by Gemini 3.1 Pro. Let's practice!`, 'ai');
             }
         }
 
@@ -331,8 +331,8 @@
         }
 
         async function callGeminiAPI(prompt, systemInstruction = "") {
-            // UPDATED MODEL: gemini-3.8-flash
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+            // UPDATED MODEL: gemini-3.1-pro-preview
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
                 systemInstruction: { parts: [{ text: systemInstruction || `You are ELSHA, a helpful English tutor. The user's name is ${userName}. Keep responses concise, friendly, and correct their grammar if needed.` }] }
@@ -548,8 +548,8 @@
                 if (!navigator.onLine || !apiKey) return;
                 
                 try {
-                    // UPDATED MODEL: gemini-3.8-flash
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+                    // UPDATED MODEL: gemini-3.1-pro-preview
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
                     const response = await fetch(url, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
