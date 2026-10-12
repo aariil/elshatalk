@@ -66,7 +66,10 @@
         <div class="space-y-4">
             <div class="relative">
                 <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" 
+                       class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all mb-3">
+                <input type="password" id="apiKeyInput" placeholder="Enter Gemini API Key" 
                        class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all">
+                <p class="text-xs text-white/50 mt-1 text-left">Your API key is saved safely in your browser.</p>
             </div>
             <button onclick="app.startApp()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all transform hover:scale-105">
                 Start Learning <i class="fas fa-arrow-right ml-2"></i>
@@ -282,7 +285,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const apiKey = "YOUR_GEMINI_API_KEY"; // Replace with your actual Gemini API Key
+        let userApiKey = localStorage.getItem('elsha_api_key') || "";
         
         let db, auth, userId;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'elsha-default-id';
@@ -337,6 +340,11 @@
             ],
 
             async init() {
+                // Prefill API Key if exists in local storage
+                if (userApiKey) {
+                    document.getElementById('apiKeyInput').value = userApiKey;
+                }
+
                 // Setup Firebase
                 try {
                     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
@@ -439,10 +447,20 @@
 
             async startApp() {
                 const nameInput = document.getElementById('userNameInput').value.trim();
+                const keyInput = document.getElementById('apiKeyInput').value.trim();
+                
                 if (!nameInput) {
                     this.showToast("Please enter your name to start.");
                     return;
                 }
+                if (!keyInput) {
+                    this.showToast("Please enter your Gemini API Key.");
+                    return;
+                }
+
+                userApiKey = keyInput;
+                localStorage.setItem('elsha_api_key', userApiKey);
+                
                 this.state.userName = nameInput;
                 document.getElementById('greetingName').innerText = `Hi, ${this.state.userName}!`;
                 
@@ -514,12 +532,12 @@
             },
 
             async callGemini(prompt, systemInstruction) {
-                if (!apiKey) {
-                    this.showToast("API Key is missing. Canvas environment required.");
+                if (!userApiKey) {
+                    this.showToast("API Key is missing. Please login again.");
                     return null;
                 }
 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
                 const payload = {
                     contents: [{ parts: [{ text: prompt }] }],
                     systemInstruction: { parts: [{ text: systemInstruction }] }
