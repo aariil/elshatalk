@@ -55,12 +55,13 @@
             
             <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4 text-sm md:text-base transition">
             
-            <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key (AQ... or AIza...)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2 text-sm md:text-base transition">
+            <!-- Diperbarui untuk Groq API -->
+            <input type="password" id="apiKeyInput" placeholder="Paste Groq API Key (gsk_...)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2 text-sm md:text-base transition">
             
-            <!-- Link Panduan API Key -->
+            <!-- Link Panduan Groq API Key -->
             <div class="mb-6 text-xs md:text-sm text-right pr-1">
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-200 hover:text-white transition underline decoration-dotted">
-                    <i class="fas fa-external-link-alt text-[10px] mr-1"></i>Belum punya API Key? Dapatkan gratis di sini.
+                <a href="https://console.groq.com/keys" target="_blank" class="text-indigo-200 hover:text-white transition underline decoration-dotted">
+                    <i class="fas fa-external-link-alt text-[10px] mr-1"></i>Belum punya API Key? Dapatkan gratis di Groq.
                 </a>
             </div>
             
@@ -284,7 +285,7 @@
                     <div class="glass p-4 rounded-2xl flex items-center justify-between">
                         <div class="pr-2">
                             <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-key mr-2"></i> API Key</h3>
-                            <p class="text-xs text-white/70 mt-0.5">Validating key format (AQ... or AIza...)</p>
+                            <p class="text-xs text-white/70 mt-0.5">Validating key format (gsk_...)</p>
                         </div>
                         <div id="statusKey" class="text-xl md:text-2xl flex-shrink-0"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
@@ -292,7 +293,7 @@
                     <div class="glass p-4 rounded-2xl flex items-center justify-between">
                         <div class="pr-2">
                             <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
-                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Gemini Flash...</p>
+                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Groq (Llama 3)...</p>
                         </div>
                         <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
@@ -356,8 +357,8 @@
                 return;
             }
 
-            if (!key.startsWith("AIzaSy") && !key.startsWith("AQ.")) {
-                alert("Warning: Valid Gemini API keys usually start with 'AIzaSy' or 'AQ.'. Please make sure your key is correct.");
+            if (!key.startsWith("gsk_")) {
+                alert("Warning: Valid Groq API keys usually start with 'gsk_'. Please make sure your key is correct.");
             }
 
             userName = name;
@@ -426,29 +427,22 @@
             if(tabId === 'status') runDiagnostics();
         }
 
-        async function callGeminiAPI(prompt, systemInstruction = "") {
-            const model = "gemini-3.8-flash";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+        // FUNGSI BARU MENGGUNAKAN GROQ API
+        async function callGroqAPI(prompt, systemInstruction = "") {
+            const model = "llama3-8b-8192";
+            const url = `https://api.groq.com/openai/v1/chat/completions`;
 
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 30000);
 
+            const defaultSystem = `You are ELSHA, a friendly English tutor. The user's name is ${userName}. Help the user practice English and gently correct grammar mistakes. Keep responses concise and engaging.`;
+
             const payload = {
-                contents: [
-                    {
-                        role: "user",
-                        parts: [{ text: prompt }]
-                    }
-                ],
-                systemInstruction: {
-                    parts: [{
-                        text: systemInstruction ||
-                            `You are ELSHA, a friendly English tutor.
-                            The user's name is ${userName}.
-                            Help the user practice English and gently
-                            correct grammar mistakes.`
-                    }]
-                }
+                model: model,
+                messages: [
+                    { role: "system", content: systemInstruction || defaultSystem },
+                    { role: "user", content: prompt }
+                ]
             };
 
             try {
@@ -456,7 +450,7 @@
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "x-goog-api-key": apiKey
+                        "Authorization": `Bearer ${apiKey}`
                     },
                     body: JSON.stringify(payload),
                     signal: controller.signal
@@ -466,16 +460,14 @@
 
                 if (!response.ok) {
                     const message = data?.error?.message || "Unknown API error";
-                    console.error("Gemini API:", response.status, data);
+                    console.error("Groq API:", response.status, data);
                     return `API Error (${response.status}): ${message}`;
                 }
 
-                const answer = data?.candidates?.[0]?.content?.parts
-                        ?.map(part => part.text || "")
-                        .join("");
+                const answer = data?.choices?.[0]?.message?.content;
 
                 if (!answer) {
-                    console.error("Unexpected Gemini response:", data);
+                    console.error("Unexpected Groq response:", data);
                     return "ELSHA received an empty response. Please try again.";
                 }
 
@@ -504,7 +496,7 @@
             input.value = '';
             
             const typingId = addTypingIndicator();
-            const response = await callGeminiAPI(text);
+            const response = await callGroqAPI(text); // Menggunakan fungsi baru
             removeTypingIndicator(typingId);
             
             addMessage(response, 'ai');
@@ -560,7 +552,7 @@
             btnSpan.innerText = "Translating...";
             const prompt = `Translate the following English text to natural Indonesian language. Do not add any extra comments, just output the translation:\n\n"${originalText}"`;
             
-            const translation = await callGeminiAPI(prompt, "You are a professional translator.");
+            const translation = await callGroqAPI(prompt, "You are a professional translator."); // Menggunakan fungsi baru
             
             if(!translation.startsWith("API Error") && !translation.startsWith("Connection error")) {
                 transBox.innerText = translation;
@@ -597,7 +589,7 @@
             
             setTimeout(async () => {
                 const typingId = addTypingIndicator();
-                const response = await callGeminiAPI("Hello, please start the roleplay based on your persona.", scenarioPrompt);
+                const response = await callGroqAPI("Hello, please start the roleplay based on your persona.", scenarioPrompt); // Menggunakan fungsi baru
                 removeTypingIndicator(typingId);
                 addMessage(response, 'ai');
                 speakText(response);
@@ -676,7 +668,8 @@
             }, 500);
 
             setTimeout(() => {
-                if (apiKey && (apiKey.startsWith("AIzaSy") || apiKey.startsWith("AQ."))) {
+                // Mengecek format gsk_ untuk Groq
+                if (apiKey && apiKey.startsWith("gsk_")) {
                     keyIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
                 } else {
                     keyIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
@@ -687,14 +680,17 @@
                 if (!navigator.onLine || !apiKey) return;
                 
                 try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent`;
+                    const url = `https://api.groq.com/openai/v1/chat/completions`;
                     const response = await fetch(url, {
                         method: "POST",
                         headers: { 
                             "Content-Type": "application/json",
-                            "x-goog-api-key": apiKey 
+                            "Authorization": `Bearer ${apiKey}`
                         },
-                        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: "ping" }] }] })
+                        body: JSON.stringify({ 
+                            model: "llama3-8b-8192", 
+                            messages: [{ role: "user", content: "ping" }] 
+                        })
                     });
                     
                     if (response.ok) {
