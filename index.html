@@ -57,7 +57,6 @@
             
             <input type="password" id="apiKeyInput" placeholder="Paste Groq API Key (gsk_...)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2 text-sm md:text-base transition">
             
-            <!-- Link Panduan Groq API Key -->
             <div class="mb-6 text-xs md:text-sm text-right pr-1">
                 <a href="https://console.groq.com/keys" target="_blank" class="text-indigo-200 hover:text-white transition underline decoration-dotted">
                     <i class="fas fa-external-link-alt text-[10px] mr-1"></i>Belum punya API Key? Dapatkan gratis di Groq.
@@ -74,7 +73,6 @@
     <!-- MAIN APP -->
     <div id="mainApp" class="hidden w-full h-[100dvh] md:h-[90vh] max-w-6xl glass md:rounded-3xl shadow-2xl flex flex-col md:flex-row relative overflow-hidden">
         
-        <!-- Mobile Top Bar -->
         <div class="md:hidden w-full glass px-4 py-3 flex items-center justify-between z-30 border-b border-white/20 shadow-sm flex-shrink-0">
             <button onclick="toggleMenu()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition focus:outline-none">
                 <i class="fas fa-bars text-lg w-6 h-6 flex items-center justify-center"></i>
@@ -83,7 +81,6 @@
             <div class="w-10"></div> 
         </div>
 
-        <!-- Sidebar -->
         <div id="sidebar" class="w-72 md:w-64 h-full sidebar-mobile md:bg-transparent border-r border-white/20 p-5 md:p-6 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 absolute md:relative z-50 top-0 left-0 shadow-2xl md:shadow-none">
             
             <button onclick="toggleMenu()" class="md:hidden absolute top-4 right-4 p-2 text-white/70 hover:text-white">
@@ -123,10 +120,8 @@
 
         <div id="sidebarOverlay" onclick="toggleMenu()" class="hidden md:hidden absolute inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"></div>
 
-        <!-- Main Content Area -->
         <div class="flex-1 h-full flex flex-col relative overflow-hidden bg-black/5 md:bg-transparent">
             
-            <!-- TAB CHAT -->
             <div id="tab-chat" class="tab-content h-full flex flex-col">
                 <div class="hidden md:flex p-5 border-b border-white/10 justify-between items-center bg-black/10 flex-shrink-0">
                     <h3 class="font-semibold text-lg"><i class="fas fa-comments mr-2"></i> Free Chat</h3>
@@ -146,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- TAB PROFIL & RAPOR -->
             <div id="tab-profile" class="tab-content hidden h-full flex flex-col p-4 md:p-6 overflow-y-auto space-y-5 pb-8">
                 <div class="mb-1 mt-1 md:mt-0 flex-shrink-0">
                     <h2 class="text-xl md:text-3xl font-bold mb-1"><i class="fas fa-user-graduate mr-2"></i> Profil & Rapor</h2>
@@ -212,7 +206,6 @@
                 </div>
             </div>
 
-            <!-- TAB ROLEPLAY -->
             <div id="tab-roleplay" class="tab-content hidden h-full flex flex-col overflow-y-auto p-4 md:p-6 pb-8">
                 <div class="mb-4 md:mb-6 mt-1 md:mt-0 flex-shrink-0">
                     <h2 class="text-xl md:text-3xl font-bold mb-1 md:mb-2"><i class="fas fa-theater-masks mr-2"></i> Roleplay</h2>
@@ -243,7 +236,6 @@
                 </div>
             </div>
 
-            <!-- TAB GAME -->
             <div id="tab-game" class="tab-content hidden h-full flex flex-col items-center justify-center p-3 md:p-6 text-center overflow-y-auto pb-8">
                 <div class="glass p-5 md:p-8 rounded-3xl w-full max-w-sm relative overflow-hidden my-auto">
                     <div class="absolute top-0 left-0 w-full h-1 bg-white/20"><div id="lvlProgress" class="h-full bg-yellow-400 w-0 transition-all"></div></div>
@@ -265,7 +257,6 @@
                 </div>
             </div>
 
-            <!-- TAB STATUS -->
             <div id="tab-status" class="tab-content hidden h-full flex flex-col p-4 md:p-6 overflow-y-auto pb-8">
                 <div class="mb-4 md:mb-6 mt-1 md:mt-0 flex-shrink-0">
                     <h2 class="text-xl md:text-3xl font-bold mb-1 md:mb-2"><i class="fas fa-stethoscope mr-2"></i> Diagnostics</h2>
@@ -292,7 +283,7 @@
                     <div class="glass p-4 rounded-2xl flex items-center justify-between">
                         <div class="pr-2">
                             <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
-                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Groq (Llama 3.1)...</p>
+                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Groq (Mixtral)...</p>
                         </div>
                         <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
@@ -426,9 +417,9 @@
             if(tabId === 'status') runDiagnostics();
         }
 
-        // FUNGSI GROQ API DENGAN MODEL TERBARU LLAMA 3.1
+        // MENGGUNAKAN MESIN MIXTRAL YANG 100% STABIL DI GROQ
         async function callGroqAPI(prompt, systemInstruction = "") {
-            const model = "llama-3.1-8b-instant";
+            const model = "mixtral-8x7b-32768";
             const url = `https://api.groq.com/openai/v1/chat/completions`;
 
             const controller = new AbortController();
@@ -686,7 +677,7 @@
                             "Authorization": `Bearer ${apiKey}`
                         },
                         body: JSON.stringify({ 
-                            model: "llama-3.1-8b-instant", 
+                            model: "mixtral-8x7b-32768", 
                             messages: [{ role: "user", content: "ping" }] 
                         })
                     });
