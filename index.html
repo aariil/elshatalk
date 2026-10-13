@@ -55,18 +55,24 @@
             
             <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Ilham)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4 text-sm md:text-base transition">
             
-            <input type="password" id="apiKeyInput" placeholder="Paste Groq API Key (gsk_...)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2 text-sm md:text-base transition">
+            <input type="password" id="apiKeyInput" placeholder="Paste Groq API Key (gsk_...)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4 text-sm md:text-base transition">
             
-            <div class="mb-6 text-xs md:text-sm text-right pr-1">
+            <!-- KOLOM BARU KHUSUS MODEL ID -->
+            <input type="text" id="modelInput" placeholder="Model ID (e.g., gemma2-9b-it)" class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2 text-sm md:text-base transition">
+            
+            <div class="mb-6 flex justify-between text-[11px] md:text-xs px-1">
+                <a href="https://console.groq.com/docs/models" target="_blank" class="text-indigo-200 hover:text-white transition underline decoration-dotted">
+                    <i class="fas fa-list mr-1"></i>Cek Model ID
+                </a>
                 <a href="https://console.groq.com/keys" target="_blank" class="text-indigo-200 hover:text-white transition underline decoration-dotted">
-                    <i class="fas fa-external-link-alt text-[10px] mr-1"></i>Belum punya API Key? Dapatkan gratis di Groq.
+                    <i class="fas fa-key mr-1"></i>Dapatkan API Key
                 </a>
             </div>
             
             <button onclick="startApp()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition duration-300 transform active:scale-95 text-sm md:text-base">
                 Start Learning <i class="fas fa-arrow-right ml-2"></i>
             </button>
-            <p class="text-[11px] md:text-xs text-white/50 mt-4">*Your API Key is stored safely in your browser.</p>
+            <p class="text-[11px] md:text-xs text-white/50 mt-4">*Your credentials are stored safely in your browser.</p>
         </div>
     </div>
 
@@ -283,7 +289,7 @@
                     <div class="glass p-4 rounded-2xl flex items-center justify-between">
                         <div class="pr-2">
                             <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
-                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Groq (Llama 3.3 70B)...</p>
+                            <p id="statusPingText" class="text-xs text-white/70 mt-0.5">Testing connection to Groq...</p>
                         </div>
                         <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
@@ -299,6 +305,7 @@
     <script>
         let userName = "";
         let apiKey = "";
+        let aiModel = ""; // Variabel baru untuk menyimpan nama model dinamis
         let chatHistory = [];
         let synth = window.speechSynthesis;
         let femaleVoice = null;
@@ -325,10 +332,12 @@
         window.onload = () => {
             const storedName = localStorage.getItem('elsha_username');
             const storedKey = localStorage.getItem('elsha_apiKey');
+            const storedModel = localStorage.getItem('elsha_model'); // Mengambil model dari memori
             
-            if (storedName && storedKey) {
+            if (storedName && storedKey && storedModel) {
                 userName = storedName;
                 apiKey = storedKey;
+                aiModel = storedModel;
                 showMainApp();
             }
             
@@ -341,20 +350,24 @@
         function startApp() {
             const name = document.getElementById('userNameInput').value.trim();
             const key = document.getElementById('apiKeyInput').value.trim();
+            const model = document.getElementById('modelInput').value.trim();
             
-            if (!name || !key) {
-                alert("Please enter both your name and API Key!");
+            if (!name || !key || !model) {
+                alert("Mohon isi Nama, API Key, dan Model ID!");
                 return;
             }
 
             if (!key.startsWith("gsk_")) {
-                alert("Warning: Valid Groq API keys usually start with 'gsk_'. Please make sure your key is correct.");
+                alert("Peringatan: API Key Groq yang benar biasanya berawalan 'gsk_'.");
             }
 
             userName = name;
             apiKey = key;
+            aiModel = model;
+            
             localStorage.setItem('elsha_username', userName);
             localStorage.setItem('elsha_apiKey', apiKey);
+            localStorage.setItem('elsha_model', aiModel); // Menyimpan model pilihan Anda
             
             showMainApp();
         }
@@ -379,6 +392,7 @@
 
         function logout() {
             localStorage.removeItem('elsha_apiKey');
+            localStorage.removeItem('elsha_model'); // Reset memori model saat keluar
             location.reload();
         }
 
@@ -417,8 +431,8 @@
             if(tabId === 'status') runDiagnostics();
         }
 
+        // FUNGSI API YANG MENGGUNAKAN NAMA MESIN DINAMIS DARI KOLOM LOGIN
         async function callGroqAPI(prompt, systemInstruction = "") {
-            const model = "llama-3.3-70b-versatile";
             const url = `https://api.groq.com/openai/v1/chat/completions`;
 
             const controller = new AbortController();
@@ -427,7 +441,7 @@
             const defaultSystem = `You are ELSHA, a friendly English tutor. The user's name is ${userName}. Help the user practice English and gently correct grammar mistakes. Keep responses concise and engaging.`;
 
             const payload = {
-                model: model,
+                model: aiModel, // Memanggil model ID yang Anda ketik
                 messages: [
                     { role: "system", content: systemInstruction || defaultSystem },
                     { role: "user", content: prompt }
@@ -641,10 +655,12 @@
             const netIcon = document.getElementById('statusNetwork');
             const keyIcon = document.getElementById('statusKey');
             const pingIcon = document.getElementById('statusPing');
+            const pingText = document.getElementById('statusPingText');
 
             netIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
             keyIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
             pingIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+            pingText.innerText = `Testing connection to Groq (${aiModel})...`;
 
             setTimeout(() => {
                 if (navigator.onLine) {
@@ -665,7 +681,7 @@
             }, 1000);
 
             setTimeout(async () => {
-                if (!navigator.onLine || !apiKey) return;
+                if (!navigator.onLine || !apiKey || !aiModel) return;
                 
                 try {
                     const url = `https://api.groq.com/openai/v1/chat/completions`;
@@ -676,7 +692,7 @@
                             "Authorization": `Bearer ${apiKey}`
                         },
                         body: JSON.stringify({ 
-                            model: "llama-3.3-70b-versatile", 
+                            model: aiModel, 
                             messages: [{ role: "user", content: "ping" }] 
                         })
                     });
