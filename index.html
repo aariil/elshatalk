@@ -283,7 +283,7 @@
                     <div class="glass p-4 rounded-2xl flex items-center justify-between">
                         <div class="pr-2">
                             <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
-                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Groq (Mixtral)...</p>
+                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Groq (Llama 3.3 70B)...</p>
                         </div>
                         <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
                     </div>
@@ -417,9 +417,8 @@
             if(tabId === 'status') runDiagnostics();
         }
 
-        // MENGGUNAKAN MESIN MIXTRAL YANG 100% STABIL DI GROQ
         async function callGroqAPI(prompt, systemInstruction = "") {
-            const model = "mixtral-8x7b-32768";
+            const model = "llama-3.3-70b-versatile";
             const url = `https://api.groq.com/openai/v1/chat/completions`;
 
             const controller = new AbortController();
@@ -677,7 +676,7 @@
                             "Authorization": `Bearer ${apiKey}`
                         },
                         body: JSON.stringify({ 
-                            model: "mixtral-8x7b-32768", 
+                            model: "llama-3.3-70b-versatile", 
                             messages: [{ role: "user", content: "ping" }] 
                         })
                     });
