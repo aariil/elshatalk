@@ -199,4 +199,551 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 flex-shrink-0">
                     <div class="glass p-4 rounded-2xl">
                         <h3 class="text-sm sm:text-base font-bold mb-2"><i class="fas fa-award mr-2"></i> Lencana Prestasi</h3>
-                        <div class="flex items-center justify-center h-20 bg-black/15 rounded
+                        <div class="flex items-center justify-center h-20 bg-black/15 rounded-xl border border-dashed border-white/20">
+                            <p class="text-[11px] sm:text-xs text-white/50 text-center px-2">Belum ada lencana. Mainkan Vocab Game untuk mengoleksi!</p>
+                        </div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl">
+                        <h3 class="text-sm sm:text-base font-bold mb-2"><i class="fas fa-book mr-2"></i> Buku Saku (Kamus)</h3>
+                        <div class="flex items-center justify-center h-20 bg-black/15 rounded-xl border border-dashed border-white/20">
+                            <p class="text-[11px] sm:text-xs text-white/50 text-center px-2">Buku saku kosong. Tebak kata dengan benar untuk mengisinya.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB ROLEPLAY -->
+            <div id="tab-roleplay" class="tab-content hidden h-full flex flex-col overflow-y-auto p-4 md:p-6 pb-8">
+                <div class="mb-4 md:mb-6 mt-1 md:mt-0 flex-shrink-0">
+                    <h2 class="text-xl md:text-3xl font-bold mb-1 md:mb-2"><i class="fas fa-theater-masks mr-2"></i> Roleplay</h2>
+                    <p class="text-white/80 text-xs md:text-base">Choose a scenario to practice real-life English.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pb-6">
+                    <div onclick="startRoleplay('You are a friendly local in a mountain village. I am a cyclist riding my bike enjoying the trees and river. I stop to ask you for directions and chat.')" class="glass p-4 md:p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-green-400 active:scale-95">
+                        <i class="fas fa-mountain text-2xl md:text-3xl text-green-400 mb-2 md:mb-3"></i>
+                        <h3 class="font-bold text-base md:text-lg">Mountain Cyclist</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Ask locals for directions while enjoying the nature.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are a waiter at a restaurant. I am a customer ordering a bowl of bakso with yellow noodles, and maybe some homemade style ramen with a half-cut soft boiled egg.')" class="glass p-4 md:p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-orange-400 active:scale-95">
+                        <i class="fas fa-utensils text-2xl md:text-3xl text-orange-400 mb-2 md:mb-3"></i>
+                        <h3 class="font-bold text-base md:text-lg">Ordering Food</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Practice ordering specific meals like ramen or bakso.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are a client who needs a logo for your courier and logistics business. I am a graphic designer discussing the visual concepts with you.')" class="glass p-4 md:p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-blue-400 active:scale-95">
+                        <i class="fas fa-pencil-ruler text-2xl md:text-3xl text-blue-400 mb-2 md:mb-3"></i>
+                        <h3 class="font-bold text-base md:text-lg">Design Client</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Discuss visual concepts for graphic design projects.</p>
+                    </div>
+                    <div onclick="startRoleplay('You are an expert mechanic. I am asking you for technical advice on why a motorcycle piston ring wears out and why a bicycle chain slips off the rear derailleur pulley.')" class="glass p-4 md:p-5 rounded-2xl cursor-pointer hover:bg-white/20 transition border-l-4 border-gray-400 active:scale-95">
+                        <i class="fas fa-cogs text-2xl md:text-3xl text-gray-400 mb-2 md:mb-3"></i>
+                        <h3 class="font-bold text-base md:text-lg">Mechanic Shop</h3>
+                        <p class="text-xs md:text-sm text-white/70 mt-1">Discuss technical vehicle repairs and parts.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB GAME -->
+            <div id="tab-game" class="tab-content hidden h-full flex flex-col items-center justify-center p-3 md:p-6 text-center overflow-y-auto pb-8">
+                <div class="glass p-5 md:p-8 rounded-3xl w-full max-w-sm relative overflow-hidden my-auto">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-white/20"><div id="lvlProgress" class="h-full bg-yellow-400 w-0 transition-all"></div></div>
+                    
+                    <div class="flex justify-between items-center mb-4 md:mb-6">
+                        <div class="text-xs md:text-sm font-bold bg-white/20 px-3 py-1 rounded-full" id="levelDisplay">Level 1</div>
+                        <div class="text-xs md:text-sm font-bold bg-yellow-400/80 text-black px-3 py-1 rounded-full shadow-lg"><i class="fas fa-star text-xs"></i> Score: <span id="scoreDisplay">0</span></div>
+                    </div>
+                    
+                    <h2 class="text-xs md:text-base mb-1 md:mb-2 text-white/80">Translate this word:</h2>
+                    <h1 id="wordToGuess" class="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-8 tracking-wider break-words px-2">...</h1>
+                    
+                    <input type="text" id="gameInput" placeholder="Indonesian meaning..." class="w-full bg-black/25 border border-white/30 rounded-xl px-4 py-3 text-center text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-3 md:mb-4 text-sm md:text-base" onkeypress="if(event.key === 'Enter') checkWord()">
+                    
+                    <button onclick="checkWord()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition shadow-lg active:scale-95 text-sm md:text-base">
+                        Submit Answer
+                    </button>
+                    <p id="gameFeedback" class="mt-3 md:mt-4 text-xs md:text-sm font-semibold h-5"></p>
+                </div>
+            </div>
+
+            <!-- TAB STATUS -->
+            <div id="tab-status" class="tab-content hidden h-full flex flex-col p-4 md:p-6 overflow-y-auto pb-8">
+                <div class="mb-4 md:mb-6 mt-1 md:mt-0 flex-shrink-0">
+                    <h2 class="text-xl md:text-3xl font-bold mb-1 md:mb-2"><i class="fas fa-stethoscope mr-2"></i> Diagnostics</h2>
+                    <p class="text-white/80 text-xs md:text-base">Check your connection and API Key status.</p>
+                </div>
+                
+                <div class="space-y-3 max-w-2xl w-full flex-shrink-0">
+                    <div class="glass p-4 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-wifi mr-2"></i> Network</h3>
+                            <p class="text-xs text-white/70 mt-0.5">Checking internet connection...</p>
+                        </div>
+                        <div id="statusNetwork" class="text-xl md:text-2xl flex-shrink-0"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
+
+                    <div class="glass p-4 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-key mr-2"></i> API Key</h3>
+                            <p class="text-xs text-white/70 mt-0.5">Validating key format (gsk_...)</p>
+                        </div>
+                        <div id="statusKey" class="text-xl md:text-2xl flex-shrink-0"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
+
+                    <div class="glass p-4 rounded-2xl flex items-center justify-between">
+                        <div class="pr-2">
+                            <h3 class="font-bold text-sm md:text-lg"><i class="fas fa-server mr-2"></i> Server Ping</h3>
+                            <p class="text-xs text-white/70 mt-0.5">Testing connection to Groq (Llama 3.1)...</p>
+                        </div>
+                        <div id="statusPing" class="text-xl md:text-2xl flex-shrink-0 text-right"><i class="fas fa-spinner fa-spin text-white/50"></i></div>
+                    </div>
+                </div>
+
+                <button onclick="runDiagnostics()" class="mt-5 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition w-full md:w-max active:scale-95 text-sm md:text-base flex-shrink-0">
+                    <i class="fas fa-sync-alt mr-2"></i> Refresh Status
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userName = "";
+        let apiKey = "";
+        let chatHistory = [];
+        let synth = window.speechSynthesis;
+        let femaleVoice = null;
+        
+        let currentScore = 0;
+        let currentLevel = 1;
+        let currentWordIndex = -1;
+        let usedIndices = [];
+        
+        const vocabLevel1 = [
+            { en: "Bicycle", id: "sepeda" }, { en: "Mountain", id: "gunung" }, { en: "Tree", id: "pohon" },
+            { en: "River", id: "sungai" }, { en: "Noodle", id: "mie" }, { en: "Egg", id: "telur" },
+            { en: "Bowl", id: "mangkuk" }, { en: "Draw", id: "menggambar" }, { en: "Paper", id: "kertas" },
+            { en: "Speak", id: "berbicara" }, { en: "Listen", id: "mendengar" }, { en: "Water", id: "air" }
+        ];
+
+        const vocabLevel2 = [
+            { en: "Piston", id: "piston" }, { en: "Pulley", id: "katrol" }, { en: "Derailleur", id: "pemindah gigi" },
+            { en: "Graphic", id: "grafis" }, { en: "Logistics", id: "logistik" }, { en: "Capital", id: "modal" },
+            { en: "Dividend", id: "dividen" }, { en: "Indemnity", id: "ganti rugi" }, { en: "Breach", id: "pelanggaran" },
+            { en: "Contract", id: "kontrak" }, { en: "Symptom", id: "gejala" }, { en: "Wear out", id: "aus" }
+        ];
+
+        window.onload = () => {
+            const storedName = localStorage.getItem('elsha_username');
+            const storedKey = localStorage.getItem('elsha_apiKey');
+            
+            if (storedName && storedKey) {
+                userName = storedName;
+                apiKey = storedKey;
+                showMainApp();
+            }
+            
+            synth.onvoiceschanged = () => {
+                const voices = synth.getVoices();
+                femaleVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Zira') || v.name.includes('Samantha') || (v.name.includes('Female') && v.lang.startsWith('en'))) || voices.find(v => v.lang.startsWith('en'));
+            };
+        };
+
+        function startApp() {
+            const name = document.getElementById('userNameInput').value.trim();
+            const key = document.getElementById('apiKeyInput').value.trim();
+            
+            if (!name || !key) {
+                alert("Please enter both your name and API Key!");
+                return;
+            }
+
+            if (!key.startsWith("gsk_")) {
+                alert("Warning: Valid Groq API keys usually start with 'gsk_'. Please make sure your key is correct.");
+            }
+
+            userName = name;
+            apiKey = key;
+            localStorage.setItem('elsha_username', userName);
+            localStorage.setItem('elsha_apiKey', apiKey);
+            
+            showMainApp();
+        }
+
+        function showMainApp() {
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            const initial = userName.charAt(0).toUpperCase();
+            document.getElementById('userGreeting').innerText = `Hi, ${userName}!`;
+            document.getElementById('userInitial').innerText = initial;
+            
+            document.getElementById('profileNameBig').innerText = userName;
+            document.getElementById('profileInitialBig').innerText = initial;
+            
+            switchTab('chat');
+            
+            if(chatHistory.length === 0) {
+                addMessage(`Hello ${userName}! I am ELSHA, your English AI tutor. Let's practice!`, 'ai');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('elsha_apiKey');
+            location.reload();
+        }
+
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-white/20'));
+            
+            const buttons = document.querySelectorAll('.menu-btn');
+            for (let btn of buttons) {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('bg-white/20');
+                    break;
+                }
+            }
+
+            if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+                toggleMenu(); 
+            }
+            
+            if(tabId === 'game' && currentWordIndex === -1) nextWord();
+            if(tabId === 'status') runDiagnostics();
+        }
+
+        // FUNGSI GROQ API DENGAN MODEL TERBARU LLAMA 3.1
+        async function callGroqAPI(prompt, systemInstruction = "") {
+            const model = "llama-3.1-8b-instant";
+            const url = `https://api.groq.com/openai/v1/chat/completions`;
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000);
+
+            const defaultSystem = `You are ELSHA, a friendly English tutor. The user's name is ${userName}. Help the user practice English and gently correct grammar mistakes. Keep responses concise and engaging.`;
+
+            const payload = {
+                model: model,
+                messages: [
+                    { role: "system", content: systemInstruction || defaultSystem },
+                    { role: "user", content: prompt }
+                ]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const message = data?.error?.message || "Unknown API error";
+                    console.error("Groq API:", response.status, data);
+                    return `API Error (${response.status}): ${message}`;
+                }
+
+                const answer = data?.choices?.[0]?.message?.content;
+
+                if (!answer) {
+                    console.error("Unexpected Groq response:", data);
+                    return "ELSHA received an empty response. Please try again.";
+                }
+
+                return answer;
+
+            } catch (error) {
+                console.error("Request failed:", error);
+
+                if (error.name === "AbortError") {
+                    return "Request timed out. Please try again.";
+                }
+
+                return `Connection error: ${error.message}`;
+
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user');
+            input.value = '';
+            
+            const typingId = addTypingIndicator();
+            const response = await callGroqAPI(text);
+            removeTypingIndicator(typingId);
+            
+            addMessage(response, 'ai');
+            speakText(response);
+        }
+
+        function addMessage(text, sender) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            const isAI = sender === 'ai';
+            
+            div.className = `flex ${isAI ? 'justify-start' : 'justify-end'} mb-4`;
+            
+            const cleanText = text.replace(/\*\*/g, '');
+            const msgId = 'msg-' + Date.now();
+
+            let innerHTML = `<div class="max-w-[90%] md:max-w-[75%] p-3 md:p-4 ${isAI ? 'chat-bubble-ai text-white' : 'chat-bubble-user text-white'} shadow-md">
+                <p class="leading-relaxed text-sm md:text-base break-words" id="${msgId}">${cleanText}</p>`;
+
+            if (isAI) {
+                innerHTML += `
+                <div class="mt-2 pt-2 border-t border-white/20 flex flex-col gap-2">
+                    <button onclick="translateInline('${msgId}')" class="text-xs md:text-sm font-semibold text-white/70 hover:text-white text-left flex items-center transition active:scale-95 w-max">
+                        <i class="fas fa-language mr-1"></i> <span id="btn-${msgId}">See Translation</span>
+                    </button>
+                    <p id="trans-${msgId}" class="text-xs md:text-sm text-yellow-200 hidden italic break-words"></p>
+                </div>`;
+            }
+            
+            innerHTML += `</div>`;
+            div.innerHTML = innerHTML;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function translateInline(msgId) {
+            const transBox = document.getElementById(`trans-${msgId}`);
+            const btnSpan = document.getElementById(`btn-${msgId}`);
+            const originalText = document.getElementById(msgId).innerText;
+
+            if (!transBox.classList.contains('hidden')) {
+                transBox.classList.add('hidden');
+                btnSpan.innerText = "See Translation";
+                return;
+            }
+
+            if (transBox.innerText !== "") {
+                transBox.classList.remove('hidden');
+                btnSpan.innerText = "Hide Translation";
+                return;
+            }
+
+            btnSpan.innerText = "Translating...";
+            const prompt = `Translate the following English text to natural Indonesian language. Do not add any extra comments, just output the translation:\n\n"${originalText}"`;
+            
+            const translation = await callGroqAPI(prompt, "You are a professional translator.");
+            
+            if(!translation.startsWith("API Error") && !translation.startsWith("Connection error")) {
+                transBox.innerText = translation;
+                transBox.classList.remove('hidden');
+                btnSpan.innerText = "Hide Translation";
+            } else {
+                btnSpan.innerText = "Translation Failed";
+            }
+        }
+
+        function addTypingIndicator() {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            const id = 'typing-' + Date.now();
+            div.id = id;
+            div.className = `flex justify-start mb-4`;
+            div.innerHTML = `<div class="p-3 md:p-4 chat-bubble-ai text-white/70 shadow-md text-sm md:text-base">
+                <i class="fas fa-circle-notch fa-spin mr-2"></i> ELSHA is typing...
+            </div>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if(el) el.remove();
+        }
+
+        function startRoleplay(scenarioPrompt) {
+            switchTab('chat');
+            document.getElementById('chatBox').innerHTML = ''; 
+            addMessage("Roleplay started! Let's begin.", 'ai');
+            
+            setTimeout(async () => {
+                const typingId = addTypingIndicator();
+                const response = await callGroqAPI("Hello, please start the roleplay based on your persona.", scenarioPrompt);
+                removeTypingIndicator(typingId);
+                addMessage(response, 'ai');
+                speakText(response);
+            }, 500);
+        }
+
+        function nextWord() {
+            const currentVocabList = currentLevel === 1 ? vocabLevel1 : vocabLevel2;
+            
+            if (usedIndices.length >= currentVocabList.length) {
+                usedIndices = [];
+            }
+
+            let rnd;
+            do {
+                rnd = Math.floor(Math.random() * currentVocabList.length);
+            } while (usedIndices.includes(rnd));
+
+            usedIndices.push(rnd);
+            currentWordIndex = rnd;
+            
+            document.getElementById('wordToGuess').innerText = currentVocabList[currentWordIndex].en;
+            document.getElementById('gameInput').value = '';
+            document.getElementById('gameFeedback').innerText = '';
+        }
+
+        function checkWord() {
+            const currentVocabList = currentLevel === 1 ? vocabLevel1 : vocabLevel2;
+            const input = document.getElementById('gameInput').value.trim().toLowerCase();
+            const correctWord = currentVocabList[currentWordIndex].id.toLowerCase();
+            const feedback = document.getElementById('gameFeedback');
+
+            if (input === correctWord) {
+                feedback.innerText = "Correct! +10 Points 🌟";
+                feedback.className = "mt-3 md:mt-4 text-xs md:text-sm font-semibold h-5 text-green-300";
+                currentScore += 10;
+                
+                document.getElementById('scoreDisplay').innerText = currentScore;
+                document.getElementById('profileScore').innerHTML = `${currentScore}<span class="text-xs">/100</span>`;
+                
+                if (currentScore >= 100 && currentLevel === 1) {
+                    currentLevel = 2;
+                    usedIndices = []; 
+                    document.getElementById('levelDisplay').innerText = "Level 2";
+                    document.getElementById('levelDisplay').classList.replace("bg-white/20", "bg-red-500/80");
+                    alert("🎉 Congratulations! You reached 100 points and advanced to Level 2! Words will be harder now.");
+                }
+
+                const progress = Math.min((currentScore % 100) || (currentScore === 100 ? 100 : 0), 100);
+                document.getElementById('lvlProgress').style.width = `${progress}%`;
+
+                setTimeout(nextWord, 1000);
+            } else {
+                feedback.innerText = `Wrong! The correct answer is "${currentVocabList[currentWordIndex].id}" ❌`;
+                feedback.className = "mt-3 md:mt-4 text-xs md:text-sm font-semibold h-5 text-red-300";
+            }
+        }
+
+        async function runDiagnostics() {
+            const netIcon = document.getElementById('statusNetwork');
+            const keyIcon = document.getElementById('statusKey');
+            const pingIcon = document.getElementById('statusPing');
+
+            netIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+            keyIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+            pingIcon.innerHTML = '<i class="fas fa-spinner fa-spin text-white/50"></i>';
+
+            setTimeout(() => {
+                if (navigator.onLine) {
+                    netIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                } else {
+                    netIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                    pingIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-400"></i>';
+                    return; 
+                }
+            }, 500);
+
+            setTimeout(() => {
+                if (apiKey && apiKey.startsWith("gsk_")) {
+                    keyIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                } else {
+                    keyIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                }
+            }, 1000);
+
+            setTimeout(async () => {
+                if (!navigator.onLine || !apiKey) return;
+                
+                try {
+                    const url = `https://api.groq.com/openai/v1/chat/completions`;
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({ 
+                            model: "llama-3.1-8b-instant", 
+                            messages: [{ role: "user", content: "ping" }] 
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        pingIcon.innerHTML = '<i class="fas fa-check-circle text-green-400"></i>';
+                    } else {
+                        const err = await response.json();
+                        console.error("API Error:", err);
+                        pingIcon.innerHTML = `<div class="flex flex-col items-end"><i class="fas fa-times-circle text-red-400 mb-1"></i> <span class="text-[10px] md:text-xs text-red-300 leading-tight">${err.error.message || 'Failed'}</span></div>`;
+                    }
+                } catch (e) {
+                    pingIcon.innerHTML = '<i class="fas fa-times-circle text-red-400"></i>';
+                }
+            }, 1500);
+        }
+
+        function speakText(text) {
+            if (!synth) return;
+            const cleanText = text.replace(/[*#]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            if (femaleVoice) utterance.voice = femaleVoice;
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1; 
+            synth.speak(utterance);
+        }
+
+        function startVoiceRecognition(mode) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Your browser does not support Voice Recognition. Please use Chrome.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US'; 
+            recognition.start();
+            
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-microphone text-red-500 fa-beat"></i>';
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if(mode === 'chat') {
+                    document.getElementById('chatInput').value = transcript;
+                }
+                btn.innerHTML = originalHTML;
+            };
+
+            recognition.onerror = () => {
+                btn.innerHTML = originalHTML;
+            };
+            
+            recognition.onend = () => {
+                btn.innerHTML = originalHTML;
+            };
+        }
+    </script>
+</body>
+</html>
