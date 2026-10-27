@@ -5,173 +5,377 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ELSHA - English AI Companion</title>
   
+  <!-- CSS ELSHA dipadukan dengan Class Logic Speakbro -->
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0f172a; color: #f8fafc; }
+    body { 
+      margin: 0; 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background-color: #0f172a; 
+      color: #f8fafc;
+    }
     .cl-hidden { display: none !important; }
     
-    /* ELSHA Modal Theme (Indigo & Cyan) */
-    .elsha-overlay {
-      position: fixed; inset: 0; display: flex; justify-content: center; align-items: center;
-      z-index: 99999; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); padding: 16px;
+    .cl-modal-overlay {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; z-index: 999994;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      padding: 16px;
     }
-    .elsha-card {
+    .cl-modal-box {
       background: #1e293b; border: 1px solid #334155; border-radius: 20px;
-      padding: 32px 24px; max-width: 420px; width: 100%; text-align: center;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      max-width: 400px; width: 100%; max-height: 90vh; overflow: auto;
+      padding: 32px 24px; text-align: center;
     }
-    .elsha-input {
+    
+    @keyframes cl-spin { to { transform: rotate(360deg); } }
+    .cl-spinner { animation: cl-spin 1s linear infinite; }
+    
+    #cl-app { width: 100%; min-height: 100vh; background-color: transparent; }
+    
+    #license-input {
       width: 100%; padding: 14px; border: 1px solid #475569; border-radius: 10px;
       background: #0f172a; color: #fff; font-size: 1rem; text-align: center;
-      outline: none; transition: border-color 0.2s; font-family: monospace;
+      outline: none; transition: border-color 0.2s; font-family: monospace; letter-spacing: 1px;
     }
-    .elsha-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3); }
-    .elsha-btn {
-      width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 10px;
+    #license-input:focus {
+      border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+    }
+    
+    #cl-btn-validate, #cl-btn-close-msg {
+      width: 100%; padding: 14px; border: none; border-radius: 10px;
       background: linear-gradient(90deg, #6366f1, #06b6d4); color: white;
       font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity 0.2s;
     }
-    .elsha-btn:hover { opacity: 0.9; }
+    #cl-btn-validate:hover, #cl-btn-close-msg:hover { opacity: 0.9; }
+    #cl-btn-close-msg { margin-top: 24px; }
   </style>
 
-  <!-- Fast Hide Script (Mencegah Kedipan Modal saat Sesi Aktif) -->
+  <!-- Skrip Fast-Hide Bawaan Speakbro (Dipertahankan Utuh) -->
   <script>
     (function(){
-      var appID = "elsha_app";
-      var savedKey = localStorage.getItem('elsha_gemini_key') || sessionStorage.getItem('elsha_gemini_key');
-      if (savedKey) {
+      var pid = "elsha_16"; // Sesuaikan ID Project ELSHA di database
+      var savedDec = null;
+      try {
+        if (window.name && window.name.indexOf('{') === 0) {
+          var cache = JSON.parse(window.name);
+          if (cache && cache['cl_dec_key_' + pid]) savedDec = cache['cl_dec_key_' + pid];
+        }
+      } catch(e){}
+      if (!savedDec) {
+        try { savedDec = localStorage.getItem('cl_dec_key_' + pid) || sessionStorage.getItem('cl_dec_key_' + pid); } catch(e){}
+      }
+      if (!savedDec) {
+        try {
+          var state = history.state;
+          if (state && typeof state === 'object' && state['cl_dec_key_' + pid]) savedDec = state['cl_dec_key_' + pid];
+        } catch(e){}
+      }
+      if (!savedDec) {
+        try {
+          var params = new URLSearchParams(window.location.search || window.location.hash.replace('#', '?'));
+          savedDec = params.get('cl_dec') || params.get('cl_dec_key');
+        } catch(e){}
+      }
+      if (savedDec) {
+        var css = '#licenseModal, #license-loader, #messageModal { display: none !important; }';
+        var head = document.head || document.getElementsByTagName('head')[0];
         var style = document.createElement('style');
-        style.id = 'elsha-fast-hide';
-        style.innerText = '#elsha-lock-modal { display: none !important; }';
-        (document.head || document.documentElement).appendChild(style);
+        style.id = 'cl-fast-hide';
+        style.type = 'text/css';
+        style.appendChild(document.createTextNode(css));
+        head.appendChild(style);
       }
     })();
   </script>
 </head>
 <body>
 
-  <!-- Modal Unlock ELSHA -->
-  <div id="elsha-lock-modal" class="elsha-overlay">
-    <div class="elsha-card">
-      <div style="font-size: 40px; margin-bottom: 10px;">🤖</div>
-      <h2 style="margin: 0 0 8px; font-size: 1.5rem; color: #f8fafc;">ELSHA AI</h2>
-      <p style="margin: 0 0 20px; color: #94a3b8; font-size: 0.9rem;">Masukkan Gemini API Key untuk memulai sesi belajar English AI</p>
-
-      <div id="elsha-error" class="cl-hidden" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;"></div>
-
-      <input type="password" id="gemini-key-input" class="elsha-input" placeholder="AIzaSy...">
-      <button type="button" id="btn-unlock" class="elsha-btn">Buka ELSHA AI</button>
+  <!-- Loader ELSHA -->
+  <div id="license-loader" class="cl-modal-overlay cl-hidden">
+    <div class="cl-modal-box">
+      <svg class="cl-spinner" style="width:48px;height:48px;margin:0 auto 16px;color:#06b6d4;" fill="none" viewBox="0 0 24 24">
+        <circle style="opacity: 0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path style="opacity: 0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p style="color: #f8fafc; font-size: 1.125rem; font-weight: 600; margin: 0;">Memverifikasi Lisensi ELSHA...</p>
     </div>
   </div>
 
-  <!-- Aplikasi Utama ELSHA (Akan Tampil Setelah Key Valid) -->
-  <div id="elsha-main-app" class="cl-hidden" style="padding: 20px;">
-    <h1>Welcome to ELSHA AI 🚀</h1>
-    <p>English Voice, Chat, Translator & Game Dashboard.</p>
-    <button onclick="testGeminiCall()">Coba Tes Gemini API</button>
-    <div id="api-output" style="margin-top:15px; background:#1e293b; padding:15px; border-radius:8px;"></div>
+  <!-- Login Modal ELSHA -->
+  <div id="licenseModal" class="cl-modal-overlay">
+    <div class="cl-modal-box">
+      <div style="margin-bottom:28px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">🤖</div>
+        <h3 style="font-size:1.5rem; font-weight:700; color:#f8fafc; margin:0 0 8px;">ELSHA AI</h3>
+        <p style="color:#94a3b8; font-size:0.875rem; margin:0;">Masukkan Kunci Lisensi untuk Memulai</p>
+      </div>
+      
+      <div id="msg-error" class="cl-hidden" style="background:rgba(239, 68, 68, 0.2); color:#fca5a5; padding:12px 14px; border-radius:12px; margin-bottom:20px; font-size:13px; font-weight:500; border:1px solid #ef4444;"></div>
+      
+      <div style="margin-bottom:20px;">
+        <input type="text" id="license-input" placeholder="Contoh: EL-XXXX-XXXX">
+      </div>
+      <button type="button" id="cl-btn-validate">Buka ELSHA</button>
+    </div>
   </div>
 
-  <!-- Logika Integrasi Gemini & Storage Lapis 5 -->
+  <!-- Message Modal -->
+  <div id="messageModal" class="cl-modal-overlay cl-hidden">
+    <div class="cl-modal-box">
+      <div id="msg-icon" style="margin: 0 auto 16px; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"></div>
+      <h3 id="msg-title" style="font-size: 1.125rem; font-weight: 700; color: #f8fafc; margin:0 0 8px;"></h3>
+      <p id="msg-text" style="color: #94a3b8; font-size: 0.875rem; margin:0;"></p>
+      <button type="button" id="cl-btn-close-msg">Tutup</button>
+    </div>
+  </div>
+
+  <!-- App Container Bawaan Speakbro (Tempat Injeksi Kode ELSHA Asli) -->
+  <div id="cl-app" class="cl-hidden"></div>
+
+  <!-- LOGIKA JAVASCRIPT BAWAAN SPEAKBRO -->
   <script>
-    let geminiApiKey = "";
+    const geminiApiKey = ""; // Akan terisi otomatis oleh environment atau payload server
 
     (function() {
-      const APP_PREFIX = "elsha_";
+      var PROJECT_ID = "elsha_16"; // ID Spesifik untuk ELSHA
+      var API_URL = "https://sharelink.web.id/wp-json/canvas-app/v1/verify";
+      if (API_URL.indexOf('http://') === 0 && window.location.protocol === 'https:') {
+        API_URL = API_URL.replace('http://', 'https://');
+      }
+      var BRAND_COLOR = "#06b6d4";
+      var isValidating = false;
 
-      function getEl(id) { return document.getElementById(id); }
+      function $(id) { return document.getElementById(id); }
+      function show(id) { var el = $(id); if(el) el.classList.remove('cl-hidden'); }
+      function hide(id) { var el = $(id); if(el) el.classList.add('cl-hidden'); }
 
-      // Multi-Layer Storage
-      function saveKey(key) {
-        try { localStorage.setItem(APP_PREFIX + 'gemini_key', key); } catch(e){}
-        try { sessionStorage.setItem(APP_PREFIX + 'gemini_key', key); } catch(e){}
-        try { document.cookie = APP_PREFIX + 'gemini_key=' + encodeURIComponent(key) + '; path=/; max-age=31536000'; } catch(e){}
+      function getFingerprint() {
+        var w = Math.max(screen.width, screen.height);
+        var h = Math.min(screen.width, screen.height);
+        var c = [navigator.userAgent, navigator.language, w, h, new Date().getTimezoneOffset()];
+        return btoa(c.join('|')).slice(0, 32);
       }
 
-      function loadSavedKey() {
+      function showMessage(title, text, success) {
+        $('msg-title').textContent = title;
+        $('msg-text').innerHTML = text;
+        $('msg-icon').innerHTML = success 
+          ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="' + BRAND_COLOR + '" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="m9 11 3 3L22 4"></path></svg>' 
+          : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>';
+        $('msg-icon').style.backgroundColor = success ? BRAND_COLOR + '20' : 'rgba(239, 68, 68, 0.2)';
+        hide('licenseModal'); hide('license-loader'); show('messageModal');
+      }
+
+      var _store = {};
+      function storeSet(key, val) {
+        try { localStorage.setItem(key, val); } catch(e) {}
+        try { sessionStorage.setItem(key, val); } catch(e) {}
         try {
-          var k = localStorage.getItem(APP_PREFIX + 'gemini_key') || sessionStorage.getItem(APP_PREFIX + 'gemini_key');
-          if (k) return k;
-          var match = document.cookie.match('(^|;) ?' + APP_PREFIX + 'gemini_key=([^;]*)(;|$)');
-          if (match) return decodeURIComponent(match[2]);
-        } catch(e){}
-        return null;
-      }
-
-      function unlockApp(key) {
-        geminiApiKey = key;
-        const fastHide = getEl('elsha-fast-hide');
-        if (fastHide) fastHide.remove();
-
-        getEl('elsha-lock-modal').classList.add('cl-hidden');
-        getEl('elsha-main-app').classList.remove('cl-hidden');
-        saveKey(key);
-      }
-
-      async function validateAndUnlock() {
-        const inputKey = getEl('gemini-key-input').value.trim();
-        const errDiv = getEl('elsha-error');
-
-        if (!inputKey) {
-          errDiv.innerText = "API Key tidak boleh kosong!";
-          errDiv.classList.remove('cl-hidden');
-          return;
-        }
-
-        // Tes langsung ke Endpoint Gemini API untuk validasi
+          var cache = {};
+          if (window.name && window.name.indexOf('{') === 0) cache = JSON.parse(window.name);
+          cache[key] = val; window.name = JSON.stringify(cache);
+        } catch(ex) {}
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${inputKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: "Hello" }] }] })
-          });
+          var state = history.state || {};
+          if (typeof state !== 'object') state = {};
+          state[key] = val; history.replaceState(state, document.title);
+        } catch(ex) {}
+        _store[key] = val;
+      }
 
-          if (res.ok) {
-            unlockApp(inputKey);
-          } else {
-            errDiv.innerText = "Gemini API Key tidak valid. Cek kembali key kamu.";
-            errDiv.classList.remove('cl-hidden');
+      function storeGet(key) {
+        try {
+          if (window.name && window.name.indexOf('{') === 0) {
+            var cache = JSON.parse(window.name);
+            if (cache && cache[key]) return cache[key];
           }
-        } catch (e) {
-          errDiv.innerText = "Gagal terhubung ke Gemini API.";
-          errDiv.classList.remove('cl-hidden');
+        } catch(e) {}
+        try {
+          var state = history.state;
+          if (state && typeof state === 'object' && state[key]) return state[key];
+        } catch(ex) {}
+        try { var v = localStorage.getItem(key); if(v) return v; } catch(e) {}
+        try { var v = sessionStorage.getItem(key); if(v) return v; } catch(e) {}
+        return _store[key] || null;
+      }
+
+      function storeRemove(key) {
+        try { localStorage.removeItem(key); } catch(e) {}
+        try { sessionStorage.removeItem(key); } catch(e) {}
+        try {
+          if (window.name && window.name.indexOf('{') === 0) {
+            var cache = JSON.parse(window.name);
+            if (cache) { delete cache[key]; window.name = JSON.stringify(cache); }
+          }
+        } catch(ex) {}
+        try {
+          var state = history.state;
+          if (state && typeof state === 'object' && state[key]) {
+            delete state[key]; history.replaceState(state, document.title);
+          }
+        } catch(ex) {}
+        delete _store[key];
+      }
+
+      function removeFastHide() {
+        try {
+          var el = document.getElementById('cl-fast-hide');
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        } catch(e){}
+      }
+
+      async function rn(p) {
+        document.documentElement.style.opacity = '0';
+        document.body.style = ''; document.body.className = '';
+        var hideIds = ['licenseModal', 'license-loader', 'messageModal'];
+        for(var i=0; i<hideIds.length; i++) { if($(hideIds[i])) $(hideIds[i]).style.display = 'none'; }
+        
+        var decodedHtml;
+        try {
+          var pTrim = p.trim();
+          var b64Regex = new RegExp('^[a-zA-Z0-9\\+\\/\\=\\s]+$');
+          if (b64Regex.test(pTrim)) decodedHtml = decodeURIComponent(atob(pTrim));
+          else decodedHtml = p;
+        } catch(e) { decodedHtml = p; }
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(decodedHtml, 'text/html');
+        const headElements = Array.from(doc.head.childNodes);
+        const bodyHtml = doc.body.innerHTML;
+        const scripts = Array.from(doc.querySelectorAll('script'));
+
+        document.head.innerHTML = '';
+        document.body.innerHTML = '';
+
+        headElements.forEach(el => {
+          if(el.tagName !== 'SCRIPT') document.head.appendChild(el.cloneNode(true));
+        });
+        document.body.innerHTML = bodyHtml;
+
+        for(const old of scripts) {
+          await new Promise(res => {
+            const s = document.createElement('script');
+            Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
+            s.text = old.innerHTML;
+            if(s.src) { s.onload = res; s.onerror = res; }
+            
+            // Injeksi API Key otomatis ke dalam script ELSHA yang baru dimuat
+            if (typeof geminiApiKey !== 'undefined' && geminiApiKey && geminiApiKey.trim() !== '' && !s.src) {
+              s.text = s.text.replace(/const\s+apiKey\s*=\s*(['"]).*?\s*;/gi, 'const apiKey = "' + geminiApiKey + '";');
+            }
+            
+            document.body.appendChild(s);
+            if(!s.src) res();
+          });
         }
+
+        window['__cl_injected_' + PROJECT_ID] = true;
+        if (typeof window.onload === 'function') window.onload(new Event('load'));
+        window.dispatchEvent(new Event('DOMContentLoaded'));
+        document.dispatchEvent(new Event('DOMContentLoaded'));
+        window.dispatchEvent(new Event('load'));
+
+        if (typeof Babel !== 'undefined' && Babel.transformScriptTags) {
+          Babel.transformScriptTags();
+        }
+
+        setTimeout(() => {
+          document.documentElement.style.transition = 'opacity 0.3s ease-in-out';
+          document.documentElement.style.opacity = '1';
+        }, 50);
       }
 
-      // Event Listeners
-      getEl('btn-unlock').addEventListener('click', validateAndUnlock);
-      getEl('gemini-key-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') validateAndUnlock();
-      });
-
-      // Auto Unlock jika Key Sudah Ada
-      const saved = loadSavedKey();
-      if (saved) {
-        unlockApp(saved);
-      }
-    })();
-
-    // Fungsi Penggunaan Gemini API di Modul-Modul ELSHA
-    async function testGeminiCall() {
-      const output = document.getElementById('api-output');
-      output.innerText = "Sedang memproses dengan Gemini...";
-
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+      function validate(autoKey = null) {
+        if(isValidating) return;
+        if(window['__cl_injected_' + PROJECT_ID]) return;
+        
+        var input = $('license-input');
+        var k = autoKey || (input ? input.value.trim() : '');
+        if(!k) { if(!autoKey && input) input.focus(); return; }
+        
+        isValidating = true;
+        hide('licenseModal'); show('license-loader'); hide('msg-error');
+        
+        var fp = storeGet('cl_dev_' + PROJECT_ID) || getFingerprint();
+        storeSet('cl_dev_' + PROJECT_ID, fp);
+        
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: "Berikan 1 kalimat motivasi belajar bahasa Inggris dalam 1 kalimat." }] }]
-          })
+          body: JSON.stringify({ license: k, app_id: "16", fingerprint: fp }) // Menjaga kompabilitas ID dengan backend
+        })
+        .then(res => res.json())
+        .then(data => {
+          isValidating = false;
+          if(data.valid && data.payload) {
+            storeSet('cl_key_' + PROJECT_ID, k);
+            storeSet('cl_dec_key_' + PROJECT_ID, data.payload);
+            try { document.cookie = 'cl_key_' + PROJECT_ID + '=' + encodeURIComponent(k) + '; path=/; max-age=31536000'; } catch(ex){}
+            setTimeout(() => { rn(data.payload); }, 500);
+          } else {
+            hide('license-loader'); removeFastHide();
+            storeRemove('cl_key_' + PROJECT_ID); storeRemove('cl_dec_key_' + PROJECT_ID);
+            try { document.cookie = 'cl_key_' + PROJECT_ID + '=; path=/; max-age=0'; } catch(ex){}
+            if(!autoKey) {
+              var err = $('msg-error');
+              if (err) { err.innerText = data.message || 'Lisensi tidak valid'; show('msg-error'); }
+              show('licenseModal');
+            } else {
+              show('licenseModal');
+            }
+          }
+        })
+        .catch(e => {
+          isValidating = false;
+          hide('license-loader'); removeFastHide();
+          if(!autoKey) {
+            var err = $('msg-error');
+            if (err) { err.innerText = 'Gagal terhubung ke server verifikasi ELSHA'; show('msg-error'); }
+          }
+          show('licenseModal');
         });
-
-        const data = await response.json();
-        const reply = data.candidates[0].content.parts[0].text;
-        output.innerText = reply;
-      } catch (err) {
-        output.innerText = "Error memanggil Gemini API.";
       }
-    }
+
+      function closeMessage() { hide('messageModal'); show('licenseModal'); }
+      
+      window.CanvasLock = { validate: validate, closeMessage: closeMessage };
+
+      function initLock() {
+        if(window['__cl_injected_' + PROJECT_ID]) return;
+        var input = $('license-input');
+        if(input) {
+          input.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') { e.preventDefault(); validate(); }
+          });
+        }
+        var btnValidate = $('cl-btn-validate');
+        if (btnValidate) btnValidate.addEventListener('click', function(e) { e.preventDefault(); validate(); });
+        
+        var btnCloseMsg = $('cl-btn-close-msg');
+        if (btnCloseMsg) btnCloseMsg.addEventListener('click', function(e) { e.preventDefault(); closeMessage(); });
+
+        var decryptedKey = storeGet('cl_dec_key_' + PROJECT_ID);
+        if (decryptedKey) { rn(decryptedKey); return; }
+
+        var saved = storeGet('cl_key_' + PROJECT_ID);
+        if (!saved) {
+          try {
+            var match = document.cookie.match('(^|;) ?cl_key_' + PROJECT_ID + '=([^;]*)(;|$)');
+            if (match) saved = decodeURIComponent(match[2]);
+          } catch(e){}
+        }
+        if(saved) validate(saved);
+        else if(input) input.focus();
+      }
+
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initLock();
+      } else {
+        document.addEventListener('DOMContentLoaded', initLock);
+      }
+    })();
   </script>
 </body>
 </html>
